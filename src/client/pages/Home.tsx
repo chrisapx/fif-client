@@ -96,7 +96,7 @@ const Home: React.FC = () => {
               <div>
                 <p className='text-sm flex itemc-center gap-1'>
                   <span className='text-[8px] text-green-500'>UGX</span> 
-                  <span className='font-semibold text-green-500'>{(2399933.00).toLocaleString()}</span>
+                  <span className='font-semibold text-green-500'>{(acc.accBalance).toLocaleString()}</span>
                   <span className='text-gray-500'><FaAngleRight size={16}/></span>
                 </p>
               </div>
