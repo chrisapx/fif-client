@@ -8,6 +8,7 @@ import AccountDetailsPanel from '../components/panels/AccountDetailsPanel';
 import { searchParamsVariables } from '../utilities/UrlParamVariables';
 import { encryptParams } from '../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
+import LoanRequestForm from '../components/forms/LoanRequestForm';
 
 const user = {
   username: "Chrisapx",
@@ -44,9 +45,20 @@ const loans = [
     amountUnPaid: 340000,
     loanStatus: "APPROVED",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
     loanDuration: 4,
+    requestedBy: "Chris",
+    owner: "Chrisapx",
     dateDispatched: new Date(2025, 3, 20),
+    settlementAccountNumber: "0758085749",
+    settlementAccountName: "MWESIGWA CHRISTOPHER",
     createdAt: new Date(2025, 3, 18),
-    updatedAt: new Date(2025, 3, 30)
+    updatedAt: new Date(2025, 3, 30),
+    approvals: [
+      { name: "", createdAt: new Date(2025, 3, 1) },
+      { name: "", createdAt: new Date(2025, 3, 7) },
+    ],
+    signatories: [
+      { name: "", createdAt: new Date(2025, 3, 1) }
+    ]
   },
   {
     loanName: "Salary Advance Loan",
@@ -207,6 +219,7 @@ const Home: React.FC = () => {
       <BottomNavigationTabs/>
       <AccountDetailsPanel/>
       <LoanDetailsPanel/>
+      <LoanRequestForm/>
     </div>
   );
 };

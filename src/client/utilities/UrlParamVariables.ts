@@ -5,4 +5,5 @@ export const searchParamsVariables = {
     historyPanelOpen: '_historyPanelOpen',
     loanDetailsPanelOpen: "_loanDetailsPanelOpen",
     selectedLoan: "_selectedLoan",
+    loanRequestPanelOpen: "_loanRequestPanelOpen"
 }

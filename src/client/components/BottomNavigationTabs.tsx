@@ -16,7 +16,7 @@ const BottomNavigationTabs: React.FC = () => {
         )}
       </NavLink>
 
-      <NavLink to="/loans">
+      {/* <NavLink to="">
         {({ isActive }) => (
           <div className="flex flex-col items-center cursor-pointer transition-colors">
             <MoneyExchange01Icon className={isActive ? "text-[#115DA9]" : "text-gray-500"} size={24} />
@@ -25,14 +25,23 @@ const BottomNavigationTabs: React.FC = () => {
         )}
       </NavLink>
 
-      <NavLink to="/history">
+      <NavLink to="">
         {({ isActive }) => (
           <div className="flex flex-col items-center cursor-pointer transition-colors">
             <BiHistory className={isActive ? "text-[#115DA9]" : "text-gray-500"} size={24} />
             <span className={`text-xs mt-1 ${isActive ? "text-[#115DA9]" : "text-gray-500"}`}>History</span>
           </div>
         )}
-      </NavLink>
+      </NavLink> */}
+      <div className="flex flex-col items-center cursor-not-allowed opacity-50 transition-colors">
+        <MoneyExchange01Icon className="text-gray-500" size={24} />
+        <span className="text-xs mt-1 text-gray-500">Loans</span>
+      </div>
+
+      <div className="flex flex-col items-center cursor-not-allowed opacity-50 transition-colors">
+        <BiHistory className="text-gray-500" size={24} />
+        <span className="text-xs mt-1 text-gray-500">History</span>
+      </div>
     </nav>
   )
 }
