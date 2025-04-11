@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button'
@@ -11,11 +11,13 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showPin, setShowPin] = useState(false);
   
-  setIsBiometricSupported(false);
-
   const toggleVisibility = () => setShowPin((prev) => !prev);
   
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsBiometricSupported(false);
+  },[])
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
