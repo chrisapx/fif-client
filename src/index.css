@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:wght@400;700&display=swap');  
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@400;700&display=swap');  
+@import 'primereact/resources/themes/lara-light-blue/theme.css';  
+@import 'primereact/resources/primereact.min.css';  
+@import 'primeicons/primeicons.css';  
+@import "tailwindcss";
+
+@layer base {  
+  body, html {  
+    background-color: rgb(255, 255, 255);  
+    font-family: 'Overpass', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',  
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',  
+      sans-serif;  
+    scroll-behavior: smooth;  
+    overflow-x: hidden;  
+  }  
+  h1, h2, h3, h4, h5, h6 {  
+    font-family: 'Tesla', sans-serif;
+  }  
+  .spin-horizontal {  
+    animation: spinHorizontal 2s linear infinite;  
+  }  
+}  
+
+@keyframes spinHorizontal {  
+  0% {  
+    transform: rotateY(0deg);  
+  }  
+  100% {  
+    transform: rotateY(360deg);  
+  }  
+}
