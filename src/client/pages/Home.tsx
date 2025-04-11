@@ -18,11 +18,13 @@ const user = {
 }
 
 const Home: React.FC = () => {
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [loans, setLoans] = useState<any[]>([]);
+  // const [accounts, setAccounts] = useState<any[]>([]);
+  // const [loans, setLoans] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  console.log(errorMessage);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -48,7 +50,7 @@ const Home: React.FC = () => {
           throw new Error('Failed to fetch balance');
         }
 
-        const data = await response.json();
+        // const data = await response.json();
       } catch (error) {
         console.error('Error fetching balance:', error);
         setErrorMessage('Failed to load balance. Please try again.');

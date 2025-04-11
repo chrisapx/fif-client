@@ -1,5 +1,4 @@
 import BottomNavigationTabs from '../components/BottomNavigationTabs'
-import Header from '../components/Header'
 
 const Loans = () => {
   return (
