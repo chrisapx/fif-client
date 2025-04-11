@@ -23,6 +23,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setErrorMessage('');
     navigate('/home');
+    setIsBiometricSupported(false);
 
     if (!username || !accessCode) {
       setErrorMessage('Please enter both username and pin code.');
