@@ -9,114 +9,61 @@ import { searchParamsVariables } from '../utilities/UrlParamVariables';
 import { encryptParams } from '../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
 import LoanRequestForm from '../components/forms/LoanRequestForm';
+import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
 
-const user = {
-  username: "Chrisapx",
-  passCode: "hja989jij98jnsjnk988ijs09j0a0j0j09ms0s",
-  accounts: [
-    { 
-      accNumber: "0328992012332", 
-      accGroup: 'Family Investment Fund', 
-      accType: "FIXED_DEPOSIT",
-      accCommitmentAmount: 12500,
-      accBalance: 2883222.98, 
-      accName: "MWESIGWA CHRISTOPHER", 
-      createdAt: new Date() 
-    },
-    { 
-      accNumber: "0328992929983", 
-      accGroup: 'Kyanja Savings', 
-      accType: "SAVINGS",
-      accBalance: 2313.98, 
-      accCommitmentAmount: 30000,
-      accName: "MWESIGWA CHRISTOPHER", 
-      createdAt: new Date() 
-    }
-  ]
-}
+const user = getAuthUser();
+const token = getUserToken();
 
-const loans = [
-  {
-    loanName: "Emergency Loan for School",
-    loanAmount: 340000,
-    loanRate: 0.08,
-    accGroup: "Family Investment Fund",
-    amoundPaid: 0,
-    amountUnPaid: 340000,
-    loanStatus: "APPROVED",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
-    loanDuration: 4,
-    requestedBy: "Chris",
-    owner: "Chrisapx",
-    dateDispatched: new Date(2025, 3, 20),
-    settlementAccountNumber: "0758085749",
-    settlementAccountName: "MWESIGWA CHRISTOPHER",
-    createdAt: new Date(2025, 3, 18),
-    updatedAt: new Date(2025, 3, 30),
-    approvals: [
-      { name: "", createdAt: new Date(2025, 3, 1) },
-      { name: "", createdAt: new Date(2025, 3, 7) },
-    ],
-    signatories: [
-      { name: "", createdAt: new Date(2025, 3, 1) }
-    ]
-  },
-  {
-    loanName: "Salary Advance Loan",
-    loanAmount: 2000000,
-    loanRate: 0.025,
-    accGroup: "Family Investment Fund",
-    amoundPaid: 1200000,
-    amountUnPaid: 800000,
-    loanStatus: "PARTIALLY_PAID",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
-    loanDuration: 6,
-    dateDispatched: new Date(2025, 3, 20),
-    createdAt: new Date(2025, 3, 18),
-    updatedAt: new Date(2025, 3, 30)
-  }
-]
+// const loans = [
+//   {
+//     loanName: "Emergency Loan for School",
+//     loanAmount: 340000,
+//     loanRate: 0.08,
+//     accGroup: "Family Investment Fund",
+//     amoundPaid: 0,
+//     amountUnPaid: 340000,
+//     loanStatus: "APPROVED",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
+//     loanDuration: 4,
+//     requestedBy: "Chris",
+//     owner: "Chrisapx",
+//     dateDispatched: new Date(2025, 3, 20),
+//     settlementAccountNumber: "0758085749",
+//     settlementAccountName: "MWESIGWA CHRISTOPHER",
+//     createdAt: new Date(2025, 3, 18),
+//     updatedAt: new Date(2025, 3, 30),
+//     approvals: [
+//       { name: "", createdAt: new Date(2025, 3, 1) },
+//       { name: "", createdAt: new Date(2025, 3, 7) },
+//     ],
+//     signatories: [
+//       { name: "", createdAt: new Date(2025, 3, 1) }
+//     ]
+//   },
+//   {
+//     loanName: "Salary Advance Loan",
+//     loanAmount: 2000000,
+//     loanRate: 0.025,
+//     accGroup: "Family Investment Fund",
+//     amoundPaid: 1200000,
+//     amountUnPaid: 800000,
+//     loanStatus: "PARTIALLY_PAID",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
+//     loanDuration: 6,
+//     dateDispatched: new Date(2025, 3, 20),
+//     createdAt: new Date(2025, 3, 18),
+//     updatedAt: new Date(2025, 3, 30)
+//   }
+// ]
 
 const Home: React.FC = () => {
-  // const [accounts, setAccounts] = useState<any[]>([]);
-  // const [loans, setLoans] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loans, setLoans] = useState<any[]>([]);
+  const [totalSavings, setToatlSavings] = useState<number>(0.0);
+  const [totalLoans, setTotalLoans] = useState<number>(0.0);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   console.log(errorMessage);
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-          setErrorMessage('Not authenticated. Please log in.');
-        //   navigate('/login');
-          return;
-        }
-
-        const response = await fetch('http://localhost:8091/users/balance', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-API-Key': '',
-            'X-Client-Key': 'native',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch balance');
-        }
-
-        // const data = await response.json();
-      } catch (error) {
-        console.error('Error fetching balance:', error);
-        setErrorMessage('Failed to load balance. Please try again.');
-      }
-    };
-
-    fetchBalance();
-  }, [navigate]);
 
   const handleAccountPanelClick = ( selectedAcc: any) => {
     searchParams.set(searchParamsVariables.accountPanelOpen, '1');
@@ -143,12 +90,12 @@ const Home: React.FC = () => {
             </span>
             </p> 
           <p className='text-sm text-white'>
-            <span className='text-[8px]'>UGX</span> {(2399933.00).toLocaleString()}
+            <span className='text-[8px]'>UGX</span> {totalSavings.toLocaleString()}
           </p>
         </div>
 
         <div className=''>
-          { user.accounts.map((acc, ix) => (
+          { accounts.map((acc, ix) => (
             <article key={ix} className='px-2 py-3 flex justify-between items-center border-b border-gray-100 select-none' onClick={() => handleAccountPanelClick(acc)}>
               <div className='flex gap-2 items-center'>
                 <MoneySavingJarIcon size={30}/>
@@ -174,7 +121,7 @@ const Home: React.FC = () => {
               <InformationCircleIcon size={16}/>
             </span>
           </p>
-          <p className='text-sm text-white'><span className='text-[8px]'>UGX</span> {(0.00).toLocaleString()}</p>
+          <p className='text-sm text-white'><span className='text-[8px]'>UGX</span> {(totalLoans).toLocaleString()}</p>
         </div>
 
         <div className=''>

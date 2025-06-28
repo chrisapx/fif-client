@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button'
 import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
+import { api_urls } from '../utilities/api_urls';
+import { setAuthUser, setUserToken } from '../utilities/AuthCookieManager';
 
 const Login: React.FC = () => {
   const [accessCode, setAccessCode] = useState<string>('');
@@ -22,7 +24,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    navigate('/home');
+    // navigate('/home');
     setIsBiometricSupported(false);
 
     if (!username || !accessCode) {
@@ -31,24 +33,24 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8091/users/login', {
+      const response = await fetch(api_urls.users.login, {
         method: 'POST',
         headers: { 
-            'Content-Type': 'application/json',
-            'x-API-Key' : '',
-            'X-Client-Key' : 'native'
+          'Content-Type': 'application/json',
+          'X-API-Key' : '',
         },
-        body: JSON.stringify({ username, pinCode: accessCode }),
+        body: JSON.stringify({ username, password: accessCode }),
       });
 
       if (!response.ok) {
         setErrorMessage('Invalid credentials');
       }
+      
+      const data = await response.json();
+      const token = data.token;
 
-      // const data = await response.json();
-      // const token = data.token;
-
-      // localStorage.setItem('jwtToken', token);
+      setUserToken(token);
+      setAuthUser(data.user)
       navigate('/home');
     } catch (error) {
       console.error('Login failed:', error);
