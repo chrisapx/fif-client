@@ -5,6 +5,12 @@ import Login from "./client/pages/Login"
 import Loans from "./client/pages/Loans"
 import History from "./client/pages/History"
 import ApplyForProducts from "./client/pages/ApplyForProducts"
+import LoanRequestForm from "./client/components/forms/LoanRequestForm"
+import NewAccountForm from "./client/components/forms/NewAccountForm"
+import Profile from "./client/pages/Profile"
+import Transactions from "./client/pages/Transactions"
+import AdminActions from "./client/pages/AdminActions"
+import MoreActions from "./client/pages/MoreActions"
 
 function App() {
 
@@ -16,8 +22,14 @@ function App() {
         <Route path="/login" element={<Login/>}/>
         <Route path="/loans" element={<Loans/>}/>
         <Route path="/history" element={<History/>}/>
+        <Route path="/profile" element={<Profile/>}/>
+        <Route path="/transactions" element={<Transactions/>}/>
+        <Route path="/admin-actions" element={<AdminActions/>}/>
+        <Route path="/more" element={<MoreActions/>}/>
         <Route path="/apply-products" element={<ApplyForProducts/>}/>
       </Routes>
+      <LoanRequestForm/>
+      <NewAccountForm/>
     </>
   )
 }

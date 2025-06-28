@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PiggyBankIcon, Wallet03Icon, File01Icon, PlusSignCircleIcon, CloudSavingDone02Icon } from 'hugeicons-react';
+import { File01Icon, PlusSignCircleIcon, Money01Icon } from 'hugeicons-react';
 import Header from '../components/Header';
 import { searchParamsVariables } from '../utilities/UrlParamVariables';
 
@@ -8,32 +8,14 @@ const productOptions = [
   {
     name: 'Open New Savings Account',
     description: 'Start saving with high interest and flexible withdrawals.',
-    icon: <CloudSavingDone02Icon size={28} />,
-    route: '/apply-products/savings',
-  },
-  {
-    name: 'Apply for a Fixed Deposit',
-    description: 'Lock funds for a period and earn fixed returns.',
-    icon: <PiggyBankIcon size={28} />,
-    route: '/apply-products/fixed-deposit',
+    icon: <Money01Icon size={28} />,
+    route: 'apply-account',
   },
   {
     name: 'Apply for a Loan',
     description: 'Get loans tailored to your needs with flexible terms.',
     icon: <File01Icon size={28} />,
-    route: '/apply-products/loan',
-  },
-  {
-    name: 'Activate Mobile Wallet',
-    description: 'Link and manage your mobile money wallet securely.',
-    icon: <Wallet03Icon size={28} />,
-    route: '/apply-products/mobile-wallet',
-  },
-  {
-    name: 'Request a Debit or Credit Card',
-    description: 'Enjoy seamless transactions with secure card services.',
-    icon: <PlusSignCircleIcon size={28} />,
-    route: '/apply-products/card',
+    route: 'apply-loan',
   },
 ];
 
@@ -41,7 +23,16 @@ const ApplyForProducts: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleApplyClick = (route: string) => {
-    searchParams.set(searchParamsVariables.menuPanelOpen, '1');
+    switch(route){
+        case "apply-account":
+            searchParams.set(searchParamsVariables.newAccountPanelOpen, '1');
+            break;
+        case "apply-loan":
+            searchParams.set(searchParamsVariables.loanRequestPanelOpen, '1');
+            break;
+        default:
+            break;
+    }
     setSearchParams(searchParams);
     console.log(route);
     // navigate(route);

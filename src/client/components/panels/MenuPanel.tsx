@@ -72,7 +72,7 @@ const MenuPanel: React.FC = () => {
                 </div>
                 <div
                   className="px-4 py-3 flex gap-3 items-center hover:bg-blue-50 active:bg-blue-100 cursor-pointer text-red-300"
-                  onClick={() => handleNavigate('/transactions')}
+                  onClick={() => handleNavigate('/admin-actions')}
                 >
                   <SecurityCheckIcon size={18} />
                   <span>Admin Actions</span>
