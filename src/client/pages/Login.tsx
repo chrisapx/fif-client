@@ -43,7 +43,7 @@ const Login: React.FC = () => {
       });
 
       if (!response.ok) {
-        setErrorMessage('Invalid credentials');
+        setErrorMessage(await response.text());
       }
       
       const data = await response.json();

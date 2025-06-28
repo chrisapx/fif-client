@@ -37,7 +37,7 @@ const AccountDetailsPanel = () => {
               </div>
               <div className='px-2 py-3'>
                 <p className='text-xs'>Account Group [SACCO]</p>
-                <p className='text-sm'>{account?.accGroup || "--"}</p>
+                <p className='text-sm'>{account?.accGroup || "FIFund"}</p>
               </div>
               <div className='px-2 py-3 border-y border-gray-200 bg-gray-100'>
                 <p className='text-xs'>Available Balance</p>
@@ -49,7 +49,7 @@ const AccountDetailsPanel = () => {
               </div>
               <div className='px-2 py-3 border-y border-gray-200 bg-gray-100'>
                 <p className='text-xs'>Commitment Amount</p>
-                <p className='text-sm text-gray-500'><span className='text-[8px]'>UGX </span>{account?.accCommitmentAmount?.toLocaleString() || "--"}</p>
+                <p className='text-sm text-gray-500'><span className='text-[8px]'>UGX </span>{account?.commitmentAmount?.toLocaleString() + " /month" || "--"}</p>
               </div>
             </section>
         )}

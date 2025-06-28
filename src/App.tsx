@@ -4,6 +4,7 @@ import Welcome from "./client/pages/Welcome"
 import Login from "./client/pages/Login"
 import Loans from "./client/pages/Loans"
 import History from "./client/pages/History"
+import ApplyForProducts from "./client/pages/ApplyForProducts"
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login/>}/>
         <Route path="/loans" element={<Loans/>}/>
         <Route path="/history" element={<History/>}/>
+        <Route path="/apply-products" element={<ApplyForProducts/>}/>
       </Routes>
     </>
   )

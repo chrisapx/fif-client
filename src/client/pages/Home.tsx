@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { FileDollarIcon, InformationCircleIcon, MoneySavingJarIcon } from 'hugeicons-react';
 import BottomNavigationTabs from '../components/BottomNavigationTabs';
 import Header from '../components/Header';
@@ -9,59 +9,21 @@ import { searchParamsVariables } from '../utilities/UrlParamVariables';
 import { encryptParams } from '../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
 import LoanRequestForm from '../components/forms/LoanRequestForm';
-import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
+// import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
+import { api_urls } from '../utilities/api_urls';
+import axios from 'axios';
 
-const user = getAuthUser();
-const token = getUserToken();
-
-// const loans = [
-//   {
-//     loanName: "Emergency Loan for School",
-//     loanAmount: 340000,
-//     loanRate: 0.08,
-//     accGroup: "Family Investment Fund",
-//     amoundPaid: 0,
-//     amountUnPaid: 340000,
-//     loanStatus: "APPROVED",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
-//     loanDuration: 4,
-//     requestedBy: "Chris",
-//     owner: "Chrisapx",
-//     dateDispatched: new Date(2025, 3, 20),
-//     settlementAccountNumber: "0758085749",
-//     settlementAccountName: "MWESIGWA CHRISTOPHER",
-//     createdAt: new Date(2025, 3, 18),
-//     updatedAt: new Date(2025, 3, 30),
-//     approvals: [
-//       { name: "", createdAt: new Date(2025, 3, 1) },
-//       { name: "", createdAt: new Date(2025, 3, 7) },
-//     ],
-//     signatories: [
-//       { name: "", createdAt: new Date(2025, 3, 1) }
-//     ]
-//   },
-//   {
-//     loanName: "Salary Advance Loan",
-//     loanAmount: 2000000,
-//     loanRate: 0.025,
-//     accGroup: "Family Investment Fund",
-//     amoundPaid: 1200000,
-//     amountUnPaid: 800000,
-//     loanStatus: "PARTIALLY_PAID",   // PENDING_APPROVAL, APPROVED, DENIED, DISPATCHED, FULLY_UNPAID, PARTIALLY_PAID, PAID, OUTSTANDING 
-//     loanDuration: 6,
-//     dateDispatched: new Date(2025, 3, 20),
-//     createdAt: new Date(2025, 3, 18),
-//     updatedAt: new Date(2025, 3, 30)
-//   }
-// ]
+// const user = getAuthUser();
+// const token = getUserToken();
 
 const Home: React.FC = () => {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loans, setLoans] = useState<any[]>([]);
-  const [totalSavings, setToatlSavings] = useState<number>(0.0);
+  const [totalSavings, setTotalSavings] = useState<number>(0.0);
   const [totalLoans, setTotalLoans] = useState<number>(0.0);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   console.log(errorMessage);
 
@@ -77,10 +39,53 @@ const Home: React.FC = () => {
     setSearchParams(searchParams);
   }
 
+  useEffect(() => {
+    const fetchAccountsAndLoans = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const [accountsRes, loansRes] = await Promise.allSettled([
+        axios.get<any[]>(api_urls.accounts.get_current_user_accounts),
+        axios.get<any[]>(api_urls.accounts.get_current_user_loans),
+      ]);
+
+      if (accountsRes.status === 'fulfilled') {
+        setAccounts(accountsRes.value.data);
+        const total = accountsRes.value.data.reduce((acc: number, account: any) => acc + account.accBalance, 0);
+        setTotalSavings(total);
+      } else {
+        setErrorMessage(prev => prev + ' Failed to load accounts.');
+      }
+
+      if (loansRes.status === 'fulfilled') {
+        setLoans(loansRes.value.data);
+        const total = loansRes.value.data.reduce((acc: number, loan: any) => acc + loan.amountUnPaid, 0);
+        setTotalLoans(total);
+      } else {
+        setErrorMessage(prev => prev + ' Failed to load loans.');
+      }
+
+    } catch (err) {
+      setErrorMessage('Unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchAccountsAndLoans();
+}, []);
+
+
   return (
     <div className="flex flex-col h-screen bg-white relative overflow-hidden">
       <Header/>
+      { isLoading && 
+        <span className="relative block w-full h-1.5 bg-blue-100 overflow-hidden rounded-full">
+          <span className="absolute top-0 left-0 h-1.5 w-48 bg-blue-600 animate-loaderSlide rounded-full"></span>
+        </span>
 
+      }
       <section className='overflow-y-auto mt-12 mb-12'>
         <div className='flex justify-between items-center px-2 py-4 bg-[#012951]'>
           <p className='text-sm text-white flex gap-2 items-center'>
