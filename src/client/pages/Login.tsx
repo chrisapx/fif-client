@@ -17,6 +17,10 @@ const Login: React.FC = () => {
   
   const navigate = useNavigate();
 
+  const handleCreateAccount = () => {
+    navigate('/create-account')
+  }
+
   useEffect(() => {
     setIsBiometricSupported(false);
   },[])
@@ -135,9 +139,10 @@ const Login: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-1 w-full">
           <button
+            onClick={handleCreateAccount}
             className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#115DA9] text-xs flex justify-between items-center"
           >
-            Apply for an account <BankIcon size={16} className="text-[#115DA9]" />
+            Create an account <BankIcon size={16} className="text-[#115DA9]" />
           </button>
           <button className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#115DA9] text-xs flex justify-center items-center opacity-50">
             ?

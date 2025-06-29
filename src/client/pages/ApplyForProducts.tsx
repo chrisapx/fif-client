@@ -11,12 +11,12 @@ const productOptions = [
     icon: <Money01Icon size={28} />,
     route: 'apply-account',
   },
-  {
-    name: 'Apply for a Loan',
-    description: 'Get loans tailored to your needs with flexible terms.',
-    icon: <File01Icon size={28} />,
-    route: 'apply-loan',
-  },
+//   {
+//     name: 'Apply for a Loan',
+//     description: 'Get loans tailored to your needs with flexible terms.',
+//     icon: <File01Icon size={28} />,
+//     route: 'apply-loan',
+//   },
 ];
 
 const ApplyForProducts: React.FC = () => {
