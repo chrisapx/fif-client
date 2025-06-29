@@ -59,7 +59,7 @@ const CreateUserAccount: React.FC = () => {
           ...(isAdmin && { Authorization: `Bearer ${token}` }),
         },
       });
-
+      console.log(response?.toString());
       setMessage({
         text: 'Account created successfully. Please verify via phone.',
         type: 'success',

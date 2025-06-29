@@ -51,7 +51,7 @@ const PhoneVerificationPanel: React.FC = () => {
       onHide={handleHidePanel}
       className="w-full"
       position="right"
-      content={({ hide }) => (
+      content={({  }) => (
         <div className="px-4 py-6">
           <h3 className="text-lg font-semibold mb-2">Verify Your Phone</h3>
           <p className="text-sm text-gray-500 mb-4">Enter the OTP sent to {phone}</p>

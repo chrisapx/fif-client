@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { File01Icon, PlusSignCircleIcon, Money01Icon } from 'hugeicons-react';
+import { PlusSignCircleIcon, Money01Icon } from 'hugeicons-react';
 import Header from '../components/Header';
 import { searchParamsVariables } from '../utilities/UrlParamVariables';
 
