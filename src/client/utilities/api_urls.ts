@@ -20,6 +20,11 @@ const api_urls = {
         
     },
 
+    transactions: {
+        create_transaction: `${API_URL}transactions`,
+        get_current_user_transactions: (userId: string) => `${API_URL}transactions/user?userId=${userId}`
+    },
+
     templates: {
         get_account_types: `${API_URL}templates/account-types`,
         get_account_branches: `${API_URL}templates/account-branches`,

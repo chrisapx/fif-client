@@ -1,201 +1,97 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { api_urls } from '../../utilities/api_urls';
-import { getAuthUser, getUserToken, logout } from '../../utilities/AuthCookieManager';
+import { useState } from "react";
 
-const user = getAuthUser();
-const token = getUserToken();
-
-interface IMessage {
-  text: string;
-  type: 'error' | 'success';
-}
-
-const CreateUserAccount: React.FC = () => {
-  const navigate = useNavigate();
-  const isAdmin = user?.roles?.includes('ADMIN');
-
-  const [message, setMessage] = useState<IMessage | null>(null);
-
+export default function CreateUser() {
   const [formData, setFormData] = useState({
-    username: '',
-    pin: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    gender: '',
-    dateOfBirth: '',
-    nin: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "",
+    nin: "",
+    nextOfKin: "",
+    username: "",
+    pin: "",
+    address: {
+      city: "",
+      country: "",
+      street: "",
+      zip: "",
+      description: ""
+    },
+    active: true
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name.startsWith("address.")) {
+      const addressField = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        address: { ...prev.address, [addressField]: value }
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
-
-    if (!/^\d{5}$/.test(formData.pin)) {
-      return setMessage({ text: 'PIN must be exactly 5 digits', type: 'error' });
-    }
-
-    const payload = new FormData();
-    payload.append('user', JSON.stringify(formData));
-
-    try {
-      const response = await axios.post(api_urls.users.create_user_account, payload, {
-        headers: {
-          ...(isAdmin && { Authorization: `Bearer ${token}` }),
-        },
-      });
-      console.log(response?.toString());
-      setMessage({
-        text: 'Account created successfully. Please verify via phone.',
-        type: 'success',
-      });
-
-      if(isAdmin){
-        navigate('/home');
-      } else {
-        navigate('/login')
-      }
-      // Navigate to phone verification step (optional)
-      // navigate(`/verify-phone?phone=${formData.phone}`);
-
-    } catch (err: any) {
-      const fallback = err?.response?.data?.message || 'Account creation failed. Try again.';
-      setMessage({ text: fallback, type: 'error' });
-    }
+    console.log("Submitting:", formData);
+    // fetch("/api/users", { method: "POST", body: JSON.stringify(formData) })
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-xl shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-[#115DA9]">Create Your User Account</h2>
-          {isAdmin && (
-            <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">
-              Logout
-            </button>
-          )}
-        </div>
+    <div className="p-6 bg-white rounded-xl shadow-md">
+      <h2 className="text-xl font-bold mb-4">Create New User</h2>
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+        {/* Basic Info */}
+        <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="input" required />
+        <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="input" required />
+        <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="input" required />
+        <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="input" required />
+        <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="input" />
+        <select name="gender" value={formData.gender} onChange={handleChange} className="input" required>
+          <option value="">Select Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        <input name="nin" placeholder="NIN" value={formData.nin} onChange={handleChange} className="input" />
+        <input name="nextOfKin" placeholder="Next of Kin" value={formData.nextOfKin} onChange={handleChange} className="input" />
+        <input name="username" placeholder="Username" value={formData.username} onChange={handleChange} className="input" />
+        <input type="password" name="pin" placeholder="PIN" value={formData.pin} onChange={handleChange} className="input" />
 
-        {message && (
-          <div
-            className={`mb-4 px-4 py-2 text-sm rounded border ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-700 border-green-200'
-                : 'bg-red-50 text-red-700 border-red-200'
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
+        {/* Address */}
+        <input name="address.city" placeholder="City" value={formData.address.city} onChange={handleChange} className="input" />
+        <input name="address.country" placeholder="Country" value={formData.address.country} onChange={handleChange} className="input" />
+        <input name="address.street" placeholder="Street" value={formData.address.street} onChange={handleChange} className="input" />
+        <input name="address.zip" placeholder="ZIP Code" value={formData.address.zip} onChange={handleChange} className="input" />
+        <textarea name="address.description" placeholder="Address Description" value={formData.address.description} onChange={handleChange} className="input col-span-2" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
-          <input
-            name="pin"
-            type="password"
-            placeholder="5-digit PIN"
-            value={formData.pin}
-            onChange={handleChange}
-            required
-            maxLength={5}
-            pattern="\d{5}"
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
-          <div className="flex gap-2">
-            <input
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded text-sm"
-            />
-            <input
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded text-sm"
-            />
-          </div>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email address"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
-          <input
-            name="phone"
-            placeholder="Phone (e.g., 2567XXXXXXXX)"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          >
-            <option value="">Select Gender</option>
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-          </select>
-          <input
-            name="dateOfBirth"
-            type="date"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
-          <input
-            name="nin"
-            placeholder="National ID Number (NIN)"
-            value={formData.nin}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded text-sm"
-          />
+        {/* Active Toggle */}
+        <label className="flex items-center gap-2 col-span-2">
+          <input type="checkbox" checked={formData.active} onChange={(e) => setFormData((prev) => ({ ...prev, active: e.target.checked }))} />
+          Active
+        </label>
 
-          <button
-            type="submit"
-            className="w-full bg-[#115DA9] text-white py-2 rounded hover:bg-blue-700 text-sm"
-          >
-            Submit
+        {/* Submit */}
+        <div className="col-span-2">
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Create User
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
+
+      {/* Tailwind Input Styles */}
+      {/* <style jsx>{`
+        .input {
+          border: 1px solid #ccc;
+          border-radius: 0.5rem;
+          padding: 0.5rem;
+          width: 100%;
+        }
+      `}</style> */}
     </div>
   );
-};
-
-export default CreateUserAccount;
+}

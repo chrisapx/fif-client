@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button'
 import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
 import { api_urls } from '../utilities/api_urls';
-import { setAuthUser, setUserToken } from '../utilities/AuthCookieManager';
+import { getAuthUser, setAuthUser, setUserToken } from '../utilities/AuthCookieManager';
 
 const Login: React.FC = () => {
   const [accessCode, setAccessCode] = useState<string>('');
@@ -56,6 +56,7 @@ const Login: React.FC = () => {
       setUserToken(token);
       setAuthUser(data.user)
       navigate('/home');
+      window.location.reload();
     } catch (error) {
       console.error('Login failed:', error);
       setErrorMessage('Login failed. Please check your credentials and try again.');
@@ -84,8 +85,8 @@ const Login: React.FC = () => {
             <img src="/logos/fif 3.png" alt="" className='h-10'/>
         </div>
         <h1 className="text-white mt-8 text-left text-lg font-bold">
-            Hello Boss!
-            <h2 className="font-normal mt-2">Welcome to FIFund</h2>
+            Hello {getAuthUser()?.lastName ?? "there"}!
+            <p className="font-normal mt-2">Welcome to FIFund</p>
         </h1>
 
       </section>

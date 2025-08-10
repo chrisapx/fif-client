@@ -9,9 +9,11 @@ import LoanRequestForm from "./client/components/forms/LoanRequestForm"
 import NewAccountForm from "./client/components/forms/NewAccountForm"
 import Profile from "./client/pages/Profile"
 import Transactions from "./client/pages/Transactions"
-import AdminActions from "./client/pages/AdminActions"
+// import AdminActions from "./client/pages/AdminActions"
 import MoreActions from "./client/pages/MoreActions"
 import CreateUserAccount from "./client/components/forms/CreateUserAccount"
+import FundMyAccount from "./client/pages/FundMyAccount"
+import NewTransactionForm from "./client/components/forms/NewTransactionForm"
 
 function App() {
   // const navigate = useNavigate();
@@ -29,10 +31,12 @@ function App() {
         <Route path="/history" element={<History/>}/>
         <Route path="/profile" element={<Profile/>}/>
         <Route path="/transactions" element={<Transactions/>}/>
-        <Route path="/admin-actions" element={<AdminActions/>}/>
+        {/* <Route path="/admin-actions" element={<AdminActions/>}/> */}
         <Route path="/more" element={<MoreActions/>}/>
         <Route path="/apply-products" element={<ApplyForProducts/>}/>
+        <Route path="fund-account" element={<FundMyAccount/>} />
       </Routes>
+      <NewTransactionForm/>
       <LoanRequestForm/>
       <NewAccountForm/>
     </>

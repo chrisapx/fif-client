@@ -1,5 +1,6 @@
 export const searchParamsVariables = {
     newAccountPanelOpen: '_openNewAccountPanelOpen',
+    newTransactionPanelOpen: '_newTransactionPanelOpen324422',
     accountPanelOpen: '_accParamOpen',
     selectedAccount: '_selectedAccount',
     historyPanelOpen: '_historyPanelOpen',
@@ -7,5 +8,9 @@ export const searchParamsVariables = {
     selectedLoan: "_selectedLoan",
     loanRequestPanelOpen: "_loanRequestPanelOpen",
     menuPanelOpen: "_menuPanelOpen29812",
-    phoneVerificationPanelOpen: "_phoneVerificationPanelOpen772782"
+    phoneVerificationPanelOpen: "_phoneVerificationPanelOpen772782",
+    adminUserPanelOpen: "_adminUserPanelOpen",
+    adminAccountPanelOpen: "_adminAccountPanelOpen",
+    adminLoanPanelOpen: "_adminLoanPanelOpen",
+    adminTransactionPanelOpen: "_adminTransactionPanelOpen"
 }
