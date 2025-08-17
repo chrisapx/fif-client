@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Logout05Icon } from 'hugeicons-react';
@@ -19,8 +19,6 @@ const NewAdminTransactionForm: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const panelStatus = searchParams.get(searchParamsVariables.newAdminTransactionPanelOpen);
-
-  const [accounts, setAccounts] = useState<any[]>([]);
   const [message, setMessage] = useState<IMessage | null>(null);
 
   const [formData, setFormData] = useState({
@@ -67,10 +65,10 @@ const NewAdminTransactionForm: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(api_urls.transactions.create_admin_transaction, payload, { headers });
-
-      setMessage({ text: 'Transaction submitted successfully. Await approval', type: 'success' });
-
+      axios.post(api_urls.transactions.create_admin_transaction, payload, { headers })
+      .then(res => {
+        setMessage({ text: res.data, type: 'success' });
+      });
       setTimeout(() => {
         handleHidePanel();
       }, 2000);
@@ -80,11 +78,6 @@ const NewAdminTransactionForm: React.FC = () => {
       setMessage({ text: fallbackMessage, type: 'error' });
     }
   };
-
-  useEffect(() => {
-    // Fetch accounts for dropdown
-    axios.get(api_urls.accounts.get_current_user_accounts).then(res => setAccounts(res.data));
-  }, []);
 
   const handleLogout = () => {
     logout();

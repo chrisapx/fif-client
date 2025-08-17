@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import BottomNavigationTabs from "../components/BottomNavigationTabs";
 import { getAuthUser } from "../../utilities/AuthCookieManager";
