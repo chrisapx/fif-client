@@ -14,7 +14,7 @@ const ViewTransactions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isApprovalLoading, setIsApprovalLoading] = useState(false);
+  const [isApprovalLoading, setIsApprovalLoading] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
   const [message, setMessage] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -77,17 +77,17 @@ const ViewTransactions = () => {
   };
 
   const handleApprove = async (trxId: string) => {
-    setIsApprovalLoading(true);
+    setIsApprovalLoading(trxId);
     setMessage('');
     setErrorMessage('');
-    axios.patch<any>(api_urls.transactions.approve_transaction(trxId),
+    axios.patch<any>(api_urls.transactions.approve_transaction(trxId), { headers },
         { params: { command: 1 }}
     ).then(resp => {
         setMessage(resp.data);
     }).catch(res => {
         setErrorMessage(res.data);
     }).finally(() => {
-        setIsApprovalLoading(false);
+        setIsApprovalLoading('');
     });
   };
 
@@ -160,12 +160,12 @@ const ViewTransactions = () => {
                 {trx.status === 'PENDING' && (
                   <button
                     onClick={() => handleApprove(trx.trxId)}
-                    disabled={isApprovalLoading}
+                    disabled={isApprovalLoading === trx.trxId}
                     className={`px-4 py-1 text-white rounded-md mb-2 ${
-                      isApprovalLoading ? 'bg-gray-400' : 'bg-green-600'
+                      isApprovalLoading === trx.trxId ? 'bg-gray-400' : 'bg-green-600'
                     }`}
                   >
-                    {isApprovalLoading ? 'Approving...' : 'Approve'}
+                    {isApprovalLoading === trx.trxId ? 'Approving...' : 'Approve'}
                   </button>
                 )}
                 <p className="text-[11px] text-gray-400">{formatDate(trx?.createdAt)}</p>

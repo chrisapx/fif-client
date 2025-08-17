@@ -1,21 +1,21 @@
 import { useNavigate } from 'react-router-dom';
-import { MoneySavingJarIcon, UserListIcon } from 'hugeicons-react';
+// import { MoneySavingJarIcon, UserListIcon } from 'hugeicons-react';
 import Header from '../../client/components/Header';
 import { GrTransaction } from 'react-icons/gr';
 
 const adminOptions = [
-  {
-    name: 'Manage Users',
-    description: 'Create, edit, or delete user accounts.',
-    icon: <UserListIcon size={28} />,
-    url: 'view-users',
-  },
-  {
-    name: 'Manage Accounts',
-    description: 'Create or modify savings accounts.',
-    icon: <MoneySavingJarIcon size={28} />,
-    url: 'view-accounts',
-  },
+  // {
+  //   name: 'Manage Users',
+  //   description: 'Create, edit, or delete user accounts.',
+  //   icon: <UserListIcon size={28} />,
+  //   url: 'view-users',
+  // },
+  // {
+  //   name: 'Manage Accounts',
+  //   description: 'Create or modify savings accounts.',
+  //   icon: <MoneySavingJarIcon size={28} />,
+  //   url: 'view-accounts',
+  // },
   // {
   //   name: 'Manage Loans',
   //   description: 'Review and approve loan applications.',

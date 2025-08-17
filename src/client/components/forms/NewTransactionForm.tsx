@@ -182,7 +182,7 @@ const NewTransactionForm: React.FC = () => {
                   name="trxDescription"
                   value={formData.trxDescription}
                   onChange={handleInputChange}
-                  placeholder="Deposit for savings via MTN"
+                  placeholder="My March Savings"
                   className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
                   required
                 />

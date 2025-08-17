@@ -66,13 +66,13 @@ const NewAccountForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const headers = {
+  const headers = {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     try {
       const response = await axios.post(api_urls.accounts.create_bank_account, formData, { headers });
@@ -95,9 +95,9 @@ const NewAccountForm: React.FC = () => {
 
   useEffect(() => {
     if (isAdmin) {
-      axios.get(api_urls.users.get_users).then(res => setAvailableUsers(res.data));
+      axios.get(api_urls.users.get_users, { headers }).then(res => setAvailableUsers(res.data));
     }
-    axios.get(api_urls.templates.get_account_branches).then(res => setBranches(res.data));
+    axios.get(api_urls.templates.get_account_branches, { headers }).then(res => setBranches(res.data));
     setAccountTypes(['IL_SAVINGS', 'IL_INVESTMENTS']);
   }, []);
 
