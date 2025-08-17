@@ -2,7 +2,7 @@ import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PlusSignCircleIcon, Money01Icon } from 'hugeicons-react';
 import Header from '../components/Header';
-import { searchParamsVariables } from '../utilities/UrlParamVariables';
+import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 
 const productOptions = [
   {

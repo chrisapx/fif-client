@@ -15,10 +15,10 @@ interface IMessage {
   type: 'error' | 'success' | 'warn';
 }
 
-const NewTransactionForm: React.FC = () => {
+const NewAdminTransactionForm: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const panelStatus = searchParams.get(searchParamsVariables.newTransactionPanelOpen);
+  const panelStatus = searchParams.get(searchParamsVariables.newAdminTransactionPanelOpen);
 
   const [accounts, setAccounts] = useState<any[]>([]);
   const [message, setMessage] = useState<IMessage | null>(null);
@@ -30,11 +30,11 @@ const NewTransactionForm: React.FC = () => {
     trxDescription: '',
     trxGateway: 'CASH',
     transactionType: 'DEPOSIT',
-    createdBy: user?.userId || '',
+    createdBy: user?.userId ?? '',
   });
 
   const handleHidePanel = () => {
-    searchParams.delete(searchParamsVariables.newTransactionPanelOpen);
+    searchParams.delete(searchParamsVariables.newAdminTransactionPanelOpen);
     setSearchParams(searchParams);
     setMessage(null);
   };
@@ -67,8 +67,7 @@ const NewTransactionForm: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(api_urls.transactions.create_transaction, payload, { headers });
-      console.log(response?.data);
+      const response = await axios.post(api_urls.transactions.create_admin_transaction, payload, { headers });
 
       setMessage({ text: 'Transaction submitted successfully. Await approval', type: 'success' });
 
@@ -120,24 +119,19 @@ const NewTransactionForm: React.FC = () => {
               )}
 
               <div className="mb-4">
-                <label htmlFor="accountId" className="block text-xs text-gray-500 mb-1">
-                  Account
+                <label htmlFor="trxAmount" className="block text-xs text-gray-500 mb-1">
+                  Account Number
                 </label>
-                <select
+                <input
+                  type="text"
                   id="accountId"
                   name="accountId"
                   value={formData.accountId}
                   onChange={handleInputChange}
+                  placeholder="Enter Account Number"
                   className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
                   required
-                >
-                  <option value="">Select account</option>
-                  {accounts.map((acc: any) => (
-                    <option key={acc.accountId} value={acc.accNumber}>
-                      {acc.accName} - {acc.accNumber}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="mb-4">
@@ -253,4 +247,4 @@ const NewTransactionForm: React.FC = () => {
   );
 };
 
-export default NewTransactionForm;
+export default NewAdminTransactionForm;

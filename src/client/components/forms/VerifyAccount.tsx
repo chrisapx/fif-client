@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { useSearchParams } from 'react-router-dom';
-import { searchParamsVariables } from '../../utilities/UrlParamVariables';
+import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
 import axios from 'axios';
-import { api_urls } from '../../utilities/api_urls';
+import { api_urls } from '../../../utilities/api_urls';
 
 interface IMessage {
   text: string;

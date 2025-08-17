@@ -15,10 +15,10 @@ interface IMessage {
   type: 'error' | 'success' | 'warn';
 }
 
-const NewAccountForm: React.FC = () => {
+const NewAdminCreateAccountForm: React.FC = () => {
     const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const panelStatus = searchParams.get(searchParamsVariables.newAccountPanelOpen);
+  const panelStatus = searchParams.get(searchParamsVariables.newCreateAccountByAdminPanelOpen);
 
   const isAdmin = user?.roles?.includes('ADMIN');
 
@@ -36,11 +36,12 @@ const NewAccountForm: React.FC = () => {
     accPhone: user?.phone || '',
     accBranch: '',
     accType: '',
-    createdBy: user?.userId || '',
+    createdBy: user?.userId ?? '',
+    approvedBy: user?.userId ?? '',
   });
 
   const handleHidePanel = () => {
-    searchParams.delete(searchParamsVariables.newAccountPanelOpen);
+    searchParams.delete(searchParamsVariables.newCreateAccountByAdminPanelOpen);
     setSearchParams(searchParams);
     setMessage(null);
   };
@@ -288,4 +289,4 @@ const NewAccountForm: React.FC = () => {
   );
 };
 
-export default NewAccountForm;
+export default NewAdminCreateAccountForm;

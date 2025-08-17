@@ -1,9 +1,9 @@
 import React from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { searchParamsVariables } from '../../utilities/UrlParamVariables';
-import { Logout05Icon, Home04Icon, UserAccountIcon, File01Icon, MoneySend01Icon, More01Icon, MoneyExchange01Icon } from 'hugeicons-react';
-import { logout } from '../../utilities/AuthCookieManager';
+import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
+import { Logout05Icon, Home04Icon, UserAccountIcon, File01Icon, MoneySend01Icon, More01Icon, MoneyExchange01Icon, SecurityCheckIcon } from 'hugeicons-react';
+import { logout } from '../../../utilities/AuthCookieManager';
 
 const MenuPanel: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -77,13 +77,13 @@ const MenuPanel: React.FC = () => {
                   <File01Icon size={18} />
                   <span>My Transactions</span>
                 </div>
-                {/* <div
+                <div
                   className="px-4 py-3 flex gap-3 items-center hover:bg-blue-50 active:bg-blue-100 cursor-pointer text-red-300"
                   onClick={() => handleNavigate('/admin-actions')}
                 >
                   <SecurityCheckIcon size={18} />
                   <span>Admin Actions</span>
-                </div> */}
+                </div>
                 <div
                   className="text-gray-200 px-4 py-3 flex gap-3 items-center hover:bg-blue-50 active:bg-blue-100 cursor-pointer"
                   // onClick={() => handleNavigate('/more')}

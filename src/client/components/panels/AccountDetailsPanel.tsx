@@ -1,7 +1,7 @@
 import { Sidebar } from 'primereact/sidebar'
 import { useSearchParams } from 'react-router-dom'
-import { searchParamsVariables } from '../../utilities/UrlParamVariables';
-import { decryptParams } from '../../utilities/EncryptionHelper';
+import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
+import { decryptParams } from '../../../utilities/EncryptionHelper';
 import { Logout05Icon } from 'hugeicons-react';
 
 const AccountDetailsPanel = () => {

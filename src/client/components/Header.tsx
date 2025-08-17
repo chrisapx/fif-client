@@ -1,7 +1,7 @@
 import { Menu03Icon, Notification02Icon } from 'hugeicons-react'
 import React from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { searchParamsVariables } from '../utilities/UrlParamVariables';
+import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 import MenuPanel from './panels/MenuPanel';
 
 const Header: React.FC = () => {

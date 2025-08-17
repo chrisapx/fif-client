@@ -14,7 +14,7 @@ const Welcome: React.FC = () => {
         />
       </div>
 
-        <button onClick={() => navigate('/home')} className='absolute z-20 bottom-4 py-3 px-4 text-white border flex-1 w-[90%] font-semibold rounded-lg mx-4'>
+        <button onClick={() => navigate('/login')} className='absolute z-20 bottom-4 py-3 px-4 text-white border flex-1 w-[90%] font-semibold rounded-lg mx-4'>
             Get Started
         </button>
 

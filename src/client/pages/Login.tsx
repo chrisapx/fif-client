@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button'
 import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
-import { api_urls } from '../utilities/api_urls';
-import { getAuthUser, setAuthUser, setUserToken } from '../utilities/AuthCookieManager';
+import { api_urls } from '../../utilities/api_urls';
+import { getAuthUser, setAuthUser, setUserToken } from '../../utilities/AuthCookieManager';
 
 const Login: React.FC = () => {
   const [accessCode, setAccessCode] = useState<string>('');
@@ -22,13 +22,12 @@ const Login: React.FC = () => {
   }
 
   useEffect(() => {
-    setIsBiometricSupported(false);
+    setIsBiometricSupported(true);
   },[])
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    // navigate('/home');
     setIsBiometricSupported(false);
 
     if (!username || !accessCode) {

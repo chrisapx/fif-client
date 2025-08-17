@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FileDollarIcon, InformationCircleIcon, MoneySavingJarIcon } from 'hugeicons-react';
 import BottomNavigationTabs from '../components/BottomNavigationTabs';
 import Header from '../components/Header';
 import { FaAngleRight } from 'react-icons/fa';
 import AccountDetailsPanel from '../components/panels/AccountDetailsPanel';
-import { searchParamsVariables } from '../utilities/UrlParamVariables';
-import { encryptParams } from '../utilities/EncryptionHelper';
+import { searchParamsVariables } from '../../utilities/UrlParamVariables';
+import { encryptParams } from '../../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
 import LoanRequestForm from '../components/forms/LoanRequestForm';
 // import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
-import { api_urls } from '../utilities/api_urls';
+import { api_urls } from '../../utilities/api_urls';
 import axios from 'axios';
+import { getUserToken, isAuthenticated } from '../../utilities/AuthCookieManager';
 
 // const user = getAuthUser();
 // const token = getUserToken();
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loans, setLoans] = useState<any[]>([]);
   const [totalSavings, setTotalSavings] = useState<number>(0.0);
@@ -39,15 +41,24 @@ const Home: React.FC = () => {
     setSearchParams(searchParams);
   }
 
+  const headers = {
+    Authorization: `Bearer ${getUserToken()}`,
+    'Content-Type': 'application/json',
+  };
+
+
   useEffect(() => {
+    if(!isAuthenticated()){
+      navigate('/login');
+    }
     const fetchAccountsAndLoans = async () => {
     setIsLoading(true);
     setErrorMessage('');
 
     try {
       const [accountsRes, loansRes] = await Promise.allSettled([
-        axios.get<any[]>(api_urls.accounts.get_current_user_accounts),
-        axios.get<any[]>(api_urls.accounts.get_current_user_loans),
+        axios.get<any[]>(api_urls.accounts.get_current_user_accounts, { headers }),
+        axios.get<any[]>(api_urls.accounts.get_current_user_loans, { headers }),
       ]);
 
       if (accountsRes.status === 'fulfilled') {

@@ -2,8 +2,8 @@ import Header from '../components/Header';
 import BottomNavigationTabs from '../components/BottomNavigationTabs';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { api_urls } from '../utilities/api_urls';
-import { getAuthUser } from '../utilities/AuthCookieManager';
+import { api_urls } from '../../utilities/api_urls';
+import { getAuthUser } from '../../utilities/AuthCookieManager';
 import { BsArrowDownCircle, BsArrowUpCircle } from 'react-icons/bs';
 import { FiRefreshCcw } from 'react-icons/fi';
 

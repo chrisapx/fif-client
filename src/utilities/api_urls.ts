@@ -22,6 +22,9 @@ const api_urls = {
 
     transactions: {
         create_transaction: `${API_URL}transactions`,
+        create_admin_transaction: `${API_URL}transactions/approved`,
+        get_all_transactions: `${API_URL}transactions`,
+        approve_transaction: (trxId: string) => `${API_URL}transactions/${trxId}`,
         get_current_user_transactions: (userId: string) => `${API_URL}transactions/user?userId=${userId}`
     },
 

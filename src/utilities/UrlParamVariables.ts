@@ -12,5 +12,7 @@ export const searchParamsVariables = {
     adminUserPanelOpen: "_adminUserPanelOpen",
     adminAccountPanelOpen: "_adminAccountPanelOpen",
     adminLoanPanelOpen: "_adminLoanPanelOpen",
-    adminTransactionPanelOpen: "_adminTransactionPanelOpen"
+    adminTransactionPanelOpen: "_adminTransactionPanelOpen",
+    newCreateAccountByAdminPanelOpen: "_newCreateAccountByAdminPanelOpen",
+    newAdminTransactionPanelOpen: "_newAdminTransactionPanelOpen"
 }

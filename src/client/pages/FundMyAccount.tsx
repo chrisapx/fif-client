@@ -2,7 +2,7 @@ import BottomNavigationTabs from '../components/BottomNavigationTabs'
 import { WalletAdd02Icon } from 'hugeicons-react'
 import Header from '../components/Header'
 import { useSearchParams } from 'react-router-dom'
-import { searchParamsVariables } from '../utilities/UrlParamVariables'
+import { searchParamsVariables } from '../../utilities/UrlParamVariables'
 
 const FundMyAccount = () => {
     const [searchParams, setSearchParams] = useSearchParams();

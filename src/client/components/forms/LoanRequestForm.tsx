@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { useSearchParams } from 'react-router-dom';
 import { Logout05Icon } from 'hugeicons-react';
-import { searchParamsVariables } from '../../utilities/UrlParamVariables';
+import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
 import { InputText } from 'primereact/inputtext';
 
 const mockUser = {

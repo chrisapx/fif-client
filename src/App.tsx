@@ -9,11 +9,16 @@ import LoanRequestForm from "./client/components/forms/LoanRequestForm"
 import NewAccountForm from "./client/components/forms/NewAccountForm"
 import Profile from "./client/pages/Profile"
 import Transactions from "./client/pages/Transactions"
-// import AdminActions from "./client/pages/AdminActions"
 import MoreActions from "./client/pages/MoreActions"
 import CreateUserAccount from "./client/components/forms/CreateUserAccount"
 import FundMyAccount from "./client/pages/FundMyAccount"
 import NewTransactionForm from "./client/components/forms/NewTransactionForm"
+import AdminActions from "./admin/pages/AdminActions"
+import ViewTransactions from "./admin/pages/ViewTransactions"
+import ViewUsers from "./admin/pages/ViewUsers"
+import ViewAcounts from "./admin/pages/ViewAcounts"
+import NewAdminCreateAccountForm from "./admin/components/forms/NewAdminCreateAccountForm"
+import NewAdminTransactionForm from "./admin/components/forms/NewAdminTransactionForm"
 
 function App() {
   // const navigate = useNavigate();
@@ -31,14 +36,22 @@ function App() {
         <Route path="/history" element={<History/>}/>
         <Route path="/profile" element={<Profile/>}/>
         <Route path="/transactions" element={<Transactions/>}/>
-        {/* <Route path="/admin-actions" element={<AdminActions/>}/> */}
         <Route path="/more" element={<MoreActions/>}/>
         <Route path="/apply-products" element={<ApplyForProducts/>}/>
         <Route path="fund-account" element={<FundMyAccount/>} />
+
+        {/* Admin routers */}
+        <Route path="/admin-actions" element={<AdminActions/>}/>
+        <Route path="/view-transactions" element={<ViewTransactions/>}/>
+        <Route path="/view-users" element={<ViewUsers/>}/>
+        <Route path="/view-accounts" element={<ViewAcounts/>}/>
+
       </Routes>
       <NewTransactionForm/>
       <LoanRequestForm/>
       <NewAccountForm/>
+      <NewAdminCreateAccountForm/>
+      <NewAdminTransactionForm/>
     </>
   )
 }
