@@ -3,7 +3,7 @@ import BottomNavigationTabs from '../components/BottomNavigationTabs';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { api_urls } from '../../utilities/api_urls';
-import { getAuthUser } from '../../utilities/AuthCookieManager';
+import { getAuthUser, getUserToken } from '../../utilities/AuthCookieManager';
 import { BsArrowDownCircle, BsArrowUpCircle } from 'react-icons/bs';
 import { FiRefreshCcw } from 'react-icons/fi';
 
@@ -40,6 +40,11 @@ const Transactions = () => {
     });
   };
 
+   const headers = {
+      Authorization: `Bearer ${getUserToken()}`,
+      'Content-Type': 'application/json',
+    };
+
   useEffect(() => {
     const fetchUserTransactions = async () => {
       setIsLoading(true);
@@ -47,7 +52,8 @@ const Transactions = () => {
 
       try {
         const response = await axios.get<any[]>(
-          api_urls.transactions.get_current_user_transactions(getAuthUser()?.userId)
+          api_urls.transactions.get_current_user_transactions(getAuthUser()?.userId),
+          { headers }
         );
         setAllTransactions(response.data);
       } catch (err) {
