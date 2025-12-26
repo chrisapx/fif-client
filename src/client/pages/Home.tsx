@@ -8,14 +8,12 @@ import AccountDetailsPanel from '../components/panels/AccountDetailsPanel';
 import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 import { encryptParams } from '../../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
-import LoanRequestForm from '../components/forms/LoanRequestForm';
+// Temporarily disabled - will be enabled later
+// import LoanRequestForm from '../components/forms/LoanRequestForm';
 // import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
 import { api_urls } from '../../utilities/api_urls';
 import axios from 'axios';
-import { getUserToken, isAuthenticated } from '../../utilities/AuthCookieManager';
-
-// const user = getAuthUser();
-// const token = getUserToken();
+import { getUserToken, isAuthenticated, getAuthUser } from '../../utilities/AuthCookieManager';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +25,7 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  console.log(errorMessage);
+  console.log('Error:', errorMessage);
 
   const handleAccountPanelClick = ( selectedAcc: any) => {
     searchParams.set(searchParamsVariables.accountPanelOpen, '1');
@@ -41,51 +39,136 @@ const Home: React.FC = () => {
     setSearchParams(searchParams);
   }
 
+  const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
+  const token = getUserToken();
+
   const headers = {
-    Authorization: `Bearer ${getUserToken()}`,
+    Authorization: `Basic ${token}`,
     'Content-Type': 'application/json',
+    'Fineract-Platform-TenantId': tenant,
   };
 
 
   useEffect(() => {
+    // Check authentication first
     if(!isAuthenticated()){
       navigate('/login');
+      return; // Stop execution if not authenticated
     }
+
     const fetchAccountsAndLoans = async () => {
-    setIsLoading(true);
-    setErrorMessage('');
+      setIsLoading(true);
+      setErrorMessage('');
 
-    try {
-      const [accountsRes, loansRes] = await Promise.allSettled([
-        axios.get<any[]>(api_urls.accounts.get_current_user_accounts, { headers }),
-        axios.get<any[]>(api_urls.accounts.get_current_user_loans, { headers }),
-      ]);
+      try {
+        // Get user data using the helper function
+        const user = getAuthUser();
+        const clientId = user?.userId;
 
-      if (accountsRes.status === 'fulfilled') {
-        setAccounts(accountsRes.value.data);
-        const total = accountsRes.value.data.reduce((acc: number, account: any) => acc + account.accBalance, 0);
+        console.log('Fetching accounts for client:', clientId);
+
+        // Debug: Check if clientId exists
+        if (!clientId) {
+          console.error('Client ID not found in user data');
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('API URL:', api_urls.clients.get_client_accounts(clientId));
+        console.log('Headers:', headers);
+
+        // Fineract returns both savings and loan accounts in one call
+        const response = await axios.get(
+          api_urls.clients.get_client_accounts(clientId),
+          { headers }
+        );
+
+        console.log('Accounts response:', response.data);
+
+        const accountsData = response.data || {};
+
+      // Helper function to convert array date to Date object
+      const convertArrayToDate = (dateArray: number[]) => {
+        if (!dateArray || !Array.isArray(dateArray)) return null;
+        return new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
+      };
+
+      // Extract savings accounts
+      if (accountsData.savingsAccounts) {
+        const savingsAccounts = accountsData.savingsAccounts.map((acc: any) => ({
+          accountId: acc.id,
+          accNumber: acc.accountNo,
+          accName: acc.productName || acc.shortProductName,
+          accBalance: acc.accountBalance || 0,
+          accStatus: acc.status?.value || 'Unknown',
+          currency: acc.currency?.displaySymbol || 'UGX',
+          productId: acc.productId,
+          depositType: acc.depositType?.value || 'Savings'
+        }));
+
+        setAccounts(savingsAccounts);
+        const total = savingsAccounts.reduce((acc: number, account: any) => acc + account.accBalance, 0);
         setTotalSavings(total);
       } else {
-        setErrorMessage(prev => prev + ' Failed to load accounts.');
+        setAccounts([]);
+        setTotalSavings(0);
       }
 
-      if (loansRes.status === 'fulfilled') {
-        setLoans(loansRes.value.data);
-        const total = loansRes.value.data.reduce((acc: number, loan: any) => acc + loan.amountUnPaid, 0);
+      // Extract loan accounts
+      if (accountsData.loanAccounts) {
+        const loanAccounts = accountsData.loanAccounts.map((loan: any) => {
+          const disbursementDate = convertArrayToDate(loan.timeline?.actualDisbursementDate);
+          const maturityDate = convertArrayToDate(loan.timeline?.actualMaturityDate || loan.timeline?.expectedMaturityDate);
+
+          // Calculate amount paid (original - balance)
+          const originalAmount = loan.originalLoan || 0;
+          const balanceAmount = loan.loanBalance || 0;
+          const paidAmount = originalAmount > balanceAmount ? originalAmount - balanceAmount : 0;
+
+          // Calculate duration in months
+          let durationMonths = 0;
+          if (disbursementDate && maturityDate) {
+            const diffTime = maturityDate.getTime() - disbursementDate.getTime();
+            durationMonths = Math.round(diffTime / (1000 * 60 * 60 * 24 * 30));
+          }
+
+          return {
+            loanId: loan.id,
+            accountNo: loan.accountNo,
+            loanName: loan.productName || loan.shortProductName,
+            loanStatus: loan.status?.value || 'Unknown',
+            amountPaid: paidAmount,
+            amountUnPaid: balanceAmount,
+            totalAmount: originalAmount,
+            interestRate: 0, // Not directly available in this structure
+            loanDuration: durationMonths || 4, // fallback to 4 months
+            dateDispatched: disbursementDate?.toISOString() || null,
+            maturityDate: maturityDate?.toISOString() || null,
+            currency: loan.currency?.displaySymbol || 'UGX',
+            inArrears: loan.inArrears || false
+          };
+        });
+
+        setLoans(loanAccounts);
+        const total = loanAccounts.reduce((acc: number, loan: any) => acc + loan.amountUnPaid, 0);
         setTotalLoans(total);
       } else {
-        setErrorMessage(prev => prev + ' Failed to load loans.');
+        setLoans([]);
+        setTotalLoans(0);
       }
 
-    } catch (err) {
-      setErrorMessage('Unexpected error occurred.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      } catch (err: any) {
+        console.error('Error fetching accounts:', err);
+        console.error('Error response:', err.response);
+        setErrorMessage(err.response?.data?.defaultUserMessage || err.message || 'Failed to load accounts and loans.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  fetchAccountsAndLoans();
-}, []);
+    // Call the fetch function
+    fetchAccountsAndLoans();
+  }, [navigate]); // Add navigate to dependencies
 
 
   return (
@@ -98,19 +181,30 @@ const Home: React.FC = () => {
 
       }
       <section className='overflow-y-auto mt-12 mb-12'>
+        {errorMessage && (
+          <div className="mx-2 my-4 px-4 py-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            {errorMessage}
+          </div>
+        )}
+
         <div className='flex justify-between items-center px-2 py-4 bg-[#012951]'>
           <p className='text-sm text-white flex gap-2 items-center'>
-            I Have 
-            <span className='opacity-50'> 
+            I Have
+            <span className='opacity-50'>
               <InformationCircleIcon size={16}/>
             </span>
-            </p> 
+            </p>
           <p className='text-sm text-white'>
             <span className='text-[8px]'>UGX</span> {totalSavings.toLocaleString()}
           </p>
         </div>
 
         <div className=''>
+          {accounts.length === 0 && !isLoading && (
+            <div className="px-4 py-8 text-center text-gray-500 text-sm">
+              No savings accounts found. Create one to get started!
+            </div>
+          )}
           { accounts.map((acc, ix) => (
             <article key={ix} className='px-2 py-3 flex justify-between items-center border-b border-gray-100 select-none' onClick={() => handleAccountPanelClick(acc)}>
               <div className='flex gap-2 items-center'>
@@ -141,6 +235,11 @@ const Home: React.FC = () => {
         </div>
 
         <div className=''>
+          {loans.length === 0 && !isLoading && (
+            <div className="px-4 py-8 text-center text-gray-500 text-sm">
+              No loans found.
+            </div>
+          )}
           { loans.map((ln, ix) => (
             <article key={ix} className='px-2 py-3 flex justify-between items-center border-b border-gray-100 select-none' onClick={() => handleLoanPanelClick(ln)}>
               <div className='flex gap-2 items-center'>
@@ -182,7 +281,8 @@ const Home: React.FC = () => {
       <BottomNavigationTabs/>
       <AccountDetailsPanel/>
       <LoanDetailsPanel/>
-      <LoanRequestForm/>
+      {/* Temporarily disabled - will be enabled later */}
+      {/* <LoanRequestForm/> */}
     </div>
   );
 };

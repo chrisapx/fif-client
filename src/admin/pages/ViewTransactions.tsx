@@ -51,44 +51,93 @@ const ViewTransactions = () => {
     fetchTransactions();
   }, [statusFilter]);
 
+  const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
+  const token = getUserToken();
+
   const headers = {
-    Authorization: `Bearer ${getUserToken()}`,
+    Authorization: `Basic ${token}`,
     'Content-Type': 'application/json',
-    };
+    'Fineract-Platform-TenantId': tenant,
+  };
 
 
   const fetchTransactions = async () => {
     setAllTransactions([]);
     setIsLoading(true);
     setErrorMessage('');
-    axios.get<any[]>(api_urls.transactions.get_all_transactions, {
-        params: {
-          page: 0,
-          size: 20,
-          status: statusFilter || undefined,
-        }, headers
-    }).then(resp => {
-        setAllTransactions(resp.data);
-    }).catch(res => {
-        setErrorMessage(res.data);
-    }).finally(() => {
-        setIsLoading(false);
-    });
+
+    try {
+      // In Fineract, we need to fetch all clients first, then their transactions
+      // For admin view, we'll get all clients and aggregate their transactions
+      const clientsResponse = await axios.get(api_urls.clients.get_clients, { headers });
+      const clients = clientsResponse.data.pageItems || clientsResponse.data;
+
+      const allTransactionsPromises = clients.map(async (client: any) => {
+        try {
+          const accountsResponse = await axios.get(
+            api_urls.clients.get_client_accounts(client.id),
+            { headers }
+          );
+
+          const savingsAccounts = accountsResponse.data.savingsAccounts || [];
+
+          // Fetch transactions for each savings account
+          const transactionsPromises = savingsAccounts.map(async (account: any) => {
+            try {
+              const txnResponse = await axios.get(
+                api_urls.transactions.get_transactions(account.id),
+                { headers }
+              );
+
+              return (txnResponse.data.transactions || []).map((trx: any) => ({
+                trxId: trx.id,
+                trxRef: trx.id?.toString() || '—',
+                trxDescription: trx.note || trx.transactionType?.value || '—',
+                trxAmount: trx.amount || 0,
+                transactionType: trx.transactionType?.deposit ? 'DEPOSIT' : 'WITHDRAW',
+                accountId: account.accountNo,
+                clientName: client.displayName || client.firstname,
+                createdAt: trx.date || trx.submittedOnDate,
+                status: trx.reversed ? 'REVERSED' : 'COMPLETED', // Fineract doesn't have pending status for posted transactions
+                currency: trx.currency?.displaySymbol || 'UGX'
+              }));
+            } catch (err) {
+              return [];
+            }
+          });
+
+          const clientTransactions = await Promise.all(transactionsPromises);
+          return clientTransactions.flat();
+        } catch (err) {
+          return [];
+        }
+      });
+
+      const transactionsArrays = await Promise.all(allTransactionsPromises);
+      let allTransactions = transactionsArrays.flat();
+
+      // Sort by date (newest first)
+      allTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      // Apply status filter
+      if (statusFilter) {
+        allTransactions = allTransactions.filter(trx => trx.status === statusFilter);
+      }
+
+      setAllTransactions(allTransactions);
+    } catch (error: any) {
+      console.error('Error fetching transactions:', error);
+      setErrorMessage(error.response?.data?.defaultUserMessage || 'Failed to load transactions');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleApprove = async (trxId: string) => {
-    setIsApprovalLoading(trxId);
-    setMessage('');
-    setErrorMessage('');
-    axios.patch<any>(api_urls.transactions.approve_transaction(trxId), { headers },
-        { params: { command: 1 }}
-    ).then(resp => {
-        setMessage(resp.data);
-    }).catch(res => {
-        setErrorMessage(res.data);
-    }).finally(() => {
-        setIsApprovalLoading('');
-    });
+    // Note: In Fineract, savings transactions are posted immediately
+    // This function is kept for compatibility but won't do anything in standard Fineract
+    setMessage('Transactions in Fineract are posted immediately and do not require approval.');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const tabs = [

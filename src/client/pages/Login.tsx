@@ -31,34 +31,129 @@ const Login: React.FC = () => {
     setIsBiometricSupported(false);
 
     if (!username || !accessCode) {
-      setErrorMessage('Please enter both username and pin code.');
+      setErrorMessage('Please enter both username and password.');
       return;
     }
 
     try {
-      const response = await fetch(api_urls.users.login, {
+      // Fineract self-service authentication
+      const credentials = btoa(`${username}:${accessCode}`);
+      const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
+
+      // For self-service, we authenticate and then fetch client details
+      const response = await fetch(api_urls.authentication.login, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'X-API-Key' : '',
+          'Fineract-Platform-TenantId': tenant,
+          'Authorization': `Basic ${credentials}`
         },
         body: JSON.stringify({ username, password: accessCode }),
       });
 
       if (!response.ok) {
-        setErrorMessage(await response.text());
-      }
-      
-      const data = await response.json();
-      const token = data.token;
+        const errorText = await response.text();
+        let errorMsg = 'Authentication failed';
 
-      setUserToken(token);
-      setAuthUser(data.user)
-      navigate('/home');
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMsg = errorData.defaultUserMessage || errorData.developerMessage || errorMsg;
+        } catch (e) {
+          errorMsg = errorText || errorMsg;
+        }
+
+        setErrorMessage(errorMsg);
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Store the base64 encoded credentials as token
+      setUserToken(credentials);
+
+      // For self-service users, get client details
+      let userData;
+
+      if (data.authenticated) {
+        // Self-service authentication successful
+        // The response contains an array of client IDs
+        const clientIds = data.clients || [];
+
+        if (clientIds.length === 0) {
+          setErrorMessage('No accounts found for this user.');
+          setIsBiometricSupported(true);
+          return;
+        }
+
+        // Fetch details for all client accounts
+        const clientDetailsPromises = clientIds.map(async (clientId: number) => {
+          try {
+            const response = await fetch(`${api_urls.authentication.self.replace('/self/user', '')}/self/clients/${clientId}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Fineract-Platform-TenantId': tenant,
+                'Authorization': `Basic ${credentials}`
+              }
+            });
+            if (response.ok) {
+              return await response.json();
+            }
+            return null;
+          } catch (error) {
+            console.error(`Error fetching client ${clientId}:`, error);
+            return null;
+          }
+        });
+
+        const clientsData = await Promise.all(clientDetailsPromises);
+        const validClients = clientsData.filter(client => client !== null);
+
+        // Store all available accounts
+        const accounts = validClients.map((client: any) => ({
+          clientId: client.id?.toString(),
+          displayName: client.displayName || client.firstname || username,
+          email: client.emailAddress || '',
+          accountNo: client.accountNo || '',
+          officeId: client.officeId,
+          officeName: client.officeName,
+          status: client.status?.value || 'Active'
+        }));
+
+        userData = {
+          username: username,
+          officeId: data.officeId,
+          officeName: data.officeName,
+          roles: data.roles || ['CLIENT'],
+          permissions: data.permissions || [],
+          accounts: accounts,
+          // If only one account, auto-select it
+          selectedAccountIndex: accounts.length === 1 ? 0 : null,
+          userId: accounts.length === 1 ? accounts[0].clientId : undefined,
+          email: accounts.length === 1 ? accounts[0].email : '',
+          firstName: accounts.length === 1 ? accounts[0].displayName : username
+        };
+      } else {
+        setErrorMessage('Authentication failed. Invalid credentials.');
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      setAuthUser(userData);
+
+      // If multiple accounts, navigate to account selection
+      // Otherwise go directly to home
+      if (userData.accounts && userData.accounts.length > 1) {
+        navigate('/select-account');
+      } else {
+        navigate('/home');
+      }
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
-      setErrorMessage('Login failed. Please check your credentials and try again.');
+      setErrorMessage(error.message || 'Login failed. Please check your credentials and try again.');
+      setIsBiometricSupported(true);
     }
   };
 
@@ -102,12 +197,10 @@ const Login: React.FC = () => {
           <div className="relative w-full">
             <InputText
                 type={showPin ? 'text' : 'password'}
-                inputMode="numeric"
-                pattern="\d*"
                 value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => setAccessCode(e.target.value)}
                 className="text-sm w-full px-4 py-4 pr-12 border-2 border-blue-300 rounded-b-md focus:outline-none focus:border-blue-500"
-                placeholder="Pin Code"
+                placeholder="Password"
             />
             <Button
                 type="button"

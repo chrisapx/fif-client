@@ -48,33 +48,67 @@ const NewAdminTransactionForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      accountId: formData.accountId,
-      trxAmount: Number(formData.trxAmount),
-      trxRef: formData.trxRef,
-      trxDescription: formData.trxDescription,
-      trxGateway: formData.trxGateway,
-      transactionType: formData.transactionType,
-      metaData: [],
-      createdBy: formData.createdBy
-    };
+    const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
 
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Basic ${token}`,
       'Content-Type': 'application/json',
+      'Fineract-Platform-TenantId': tenant,
     };
 
     try {
-      axios.post(api_urls.transactions.create_admin_transaction, payload, { headers })
-      .then(res => {
-        setMessage({ text: res.data, type: 'success' });
+      // For admin transactions, we post directly (no approval needed)
+      const isDeposit = formData.transactionType === 'DEPOSIT';
+      const endpoint = isDeposit
+        ? api_urls.transactions.deposit(formData.accountId)
+        : api_urls.transactions.withdrawal(formData.accountId);
+
+      // Format date as required by Fineract
+      const today = new Date();
+      const dateFormat = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(today);
+
+      const payload = {
+        locale: 'en',
+        dateFormat: 'dd MMMM yyyy',
+        transactionDate: dateFormat,
+        transactionAmount: Number(formData.trxAmount),
+        paymentTypeId: formData.trxGateway === 'CASH' ? 1 : 2,
+        note: formData.trxDescription,
+        accountNumber: formData.accountId,
+        checkNumber: formData.trxRef || '',
+        receiptNumber: formData.trxRef || ''
+      };
+
+      const response = await axios.post(endpoint, payload, { headers });
+
+      setMessage({
+        text: `${isDeposit ? 'Deposit' : 'Withdrawal'} posted successfully!`,
+        type: 'success'
       });
+
+      // Reset form
+      setFormData({
+        accountId: '',
+        trxAmount: '',
+        trxRef: '',
+        trxDescription: '',
+        trxGateway: 'CASH',
+        transactionType: 'DEPOSIT',
+        createdBy: user?.userId ?? '',
+      });
+
       setTimeout(() => {
         handleHidePanel();
       }, 2000);
     } catch (error: any) {
       const fallbackMessage =
-        error?.response?.data?.message || 'Failed to submit transaction. Try again.';
+        error?.response?.data?.defaultUserMessage ||
+        error?.response?.data?.errors?.[0]?.defaultUserMessage ||
+        'Failed to submit transaction. Try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
     }
   };

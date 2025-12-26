@@ -20,9 +20,6 @@ const NewAccountForm: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const panelStatus = searchParams.get(searchParamsVariables.newAccountPanelOpen);
 
-  const isAdmin = user?.roles?.includes('ADMIN');
-
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [accountTypes, setAccountTypes] = useState<any[]>([]);
 
@@ -53,52 +50,141 @@ const NewAccountForm: React.FC = () => {
     }));
   };
 
-  const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-    const selectedUser = availableUsers.find(u => u.userId === selectedId);
-    if (selectedUser) {
-      setFormData(prev => ({
-        ...prev,
-        userId: selectedId,
-        accEmail: selectedUser.email,
-        accPhone: selectedUser.phone,
-      }));
-    }
-  };
+  const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
 
   const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Basic ${token}`,
       'Content-Type': 'application/json',
+      'Fineract-Platform-TenantId': tenant,
     };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(api_urls.accounts.create_bank_account, formData, { headers });
-      console.log(response?.data)
-    
+      // Get savings products first to find matching product
+      let savingsProducts = [];
+      try {
+        const productsResponse = await axios.get(api_urls.templates.savings_products, { headers });
+        savingsProducts = productsResponse.data?.savingsProductOptions || productsResponse.data || [];
+      } catch (productError) {
+        console.warn('Could not fetch savings products. Using defaults.');
+        // If we can't fetch products, we'll create a basic account request
+      }
+
+      // Use the first available savings product or match by type
+      let selectedProduct = null;
+      if (savingsProducts.length > 0) {
+        selectedProduct = savingsProducts.find((p: any) =>
+          p.name?.toLowerCase().includes('savings')
+        ) || savingsProducts[0];
+      }
+
+      // Format date as required by Fineract
+      const today = new Date();
+      const dateFormat = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(today);
+
+      // Fineract savings account payload
+      const payload: any = {
+        clientId: Number(formData.userId),
+        locale: 'en',
+        dateFormat: 'dd MMMM yyyy',
+        submittedOnDate: dateFormat,
+      };
+
+      // Add product details if available
+      if (selectedProduct) {
+        payload.productId = selectedProduct.id;
+        payload.nominalAnnualInterestRate = selectedProduct.nominalAnnualInterestRate || 5;
+        payload.interestCompoundingPeriodType = selectedProduct.interestCompoundingPeriodType || 1;
+        payload.interestPostingPeriodType = selectedProduct.interestPostingPeriodType || 4;
+        payload.interestCalculationType = selectedProduct.interestCalculationType || 1;
+        payload.interestCalculationDaysInYearType = selectedProduct.interestCalculationDaysInYearType || 365;
+      } else {
+        // Fallback: provide reasonable defaults
+        setMessage({ text: 'Using default savings product configuration.', type: 'warn' });
+      }
+
+      payload.withdrawalFeeForTransfers = false;
+      payload.allowOverdraft = false;
+      payload.enforceMinRequiredBalance = false;
+      payload.withHoldTax = false;
+
+      const response = await axios.post(
+        api_urls.savingsAccounts.create_savings_account,
+        payload,
+        { headers }
+      );
+
+      console.log('Account created:', response?.data);
+
+      // Note: Self-service users cannot approve/activate accounts
+      // These must be done by staff/admin through the admin panel
       setMessage({
-        text: 'Account being set up. You may refresh later to check status.',
+        text: 'Savings account application submitted! It will be activated by admin.',
         type: 'success',
+      });
+
+      // Reset form
+      setFormData({
+        accName: '',
+        commitmentAmount: '',
+        userId: user?.userId || '',
+        accEmail: user?.email || '',
+        accPhone: user?.phone || '',
+        accBranch: '',
+        accType: '',
+        createdBy: user?.userId || '',
       });
 
       setTimeout(() => {
         handleHidePanel();
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
+      console.error('Account creation error:', error);
       const fallbackMessage =
-        error?.response?.data?.message || 'Failed to create account. Try again.';
+        error?.response?.data?.defaultUserMessage ||
+        error?.response?.data?.errors?.[0]?.defaultUserMessage ||
+        error?.message ||
+        'Failed to create account. Try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
     }
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      axios.get(api_urls.users.get_users, { headers }).then(res => setAvailableUsers(res.data));
-    }
-    axios.get(api_urls.templates.get_account_branches, { headers }).then(res => setBranches(res.data));
-    setAccountTypes(['IL_SAVINGS', 'IL_INVESTMENTS']);
+    const fetchTemplateData = async () => {
+      try {
+        // Try to fetch offices (may not be accessible for self-service users)
+        // try {
+        //   const officesResponse = await axios.get(api_urls.templates.offices, { headers });
+        //   if (officesResponse.data && Array.isArray(officesResponse.data)) {
+        //     setBranches(officesResponse.data.map((office: any) => office.name));
+        //   } else {
+        //     // Fallback to default branch
+        //     setBranches(['Head Office']);
+        //   }
+        // } catch (officesError) {
+        //   console.warn('Could not fetch offices (self-service users may not have access). Using default branch.');
+        //   // Fallback: Use default branch
+        //   setBranches(['Head Office']);
+        // }
+        setBranches(['Head Office']); // Temporarily disable office fetching
+
+        // Set account types (hardcoded as self-service may not have access to account type templates)
+        setAccountTypes(['SAVINGS', 'INVESTMENTS']);
+      } catch (error) {
+        console.error('Error fetching template data:', error);
+        // Ensure we have fallback values even if everything fails
+        setBranches(['Head Office']);
+        setAccountTypes(['SAVINGS', 'INVESTMENTS']);
+      }
+    };
+
+    fetchTemplateData();
   }, []);
 
   const handleLogout = () => {
@@ -130,29 +216,6 @@ const NewAccountForm: React.FC = () => {
                   }`}
                 >
                   {message.text}
-                </div>
-              )}
-
-              {isAdmin && (
-                <div className="mb-4">
-                  <label htmlFor="userId" className="block text-xs text-gray-500 mb-1">
-                    Select User
-                  </label>
-                  <select
-                    id="userId"
-                    name="userId"
-                    value={formData.userId}
-                    onChange={handleUserChange}
-                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                    required
-                  >
-                    <option value="">Choose a user</option>
-                    {availableUsers.map(u => (
-                      <option key={u.userId} value={u.userId}>
-                        {u.firstName} {u.lastName}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               )}
 

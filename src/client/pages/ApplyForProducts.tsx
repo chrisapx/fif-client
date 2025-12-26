@@ -5,18 +5,19 @@ import Header from '../components/Header';
 import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 
 const productOptions = [
-  {
-    name: 'Open New Savings Account',
-    description: 'Start saving with high interest and flexible withdrawals.',
-    icon: <Money01Icon size={28} />,
-    route: 'apply-account',
-  },
-//   {
-//     name: 'Apply for a Loan',
-//     description: 'Get loans tailored to your needs with flexible terms.',
-//     icon: <File01Icon size={28} />,
-//     route: 'apply-loan',
-//   },
+  // Temporarily disabled - will be enabled later
+  // {
+  //   name: 'Open New Savings Account',
+  //   description: 'Start saving with high interest and flexible withdrawals.',
+  //   icon: <Money01Icon size={28} />,
+  //   route: 'apply-account',
+  // },
+  // {
+  //   name: 'Apply for a Loan',
+  //   description: 'Get loans tailored to your needs with flexible terms.',
+  //   icon: <File01Icon size={28} />,
+  //   route: 'apply-loan',
+  // },
 ];
 
 const ApplyForProducts: React.FC = () => {
@@ -49,24 +50,31 @@ const ApplyForProducts: React.FC = () => {
         </div>
 
         <div className="grid gap-4">
-          {productOptions.map((product, idx) => (
-            <div
-              key={idx}
-              className="flex justify-between items-center px-4 py-4 border border-gray-200 rounded-2xl shadow-sm bg-gray-50 hover:shadow-md transition duration-150 cursor-pointer"
-              onClick={() => handleApplyClick(product.route)}
-            >
-              <div className="flex gap-4 items-center">
-                <div className="text-blue-600 bg-blue-100 p-2 rounded-full">
-                  {product.icon}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">{product.name}</p>
-                  <p className="text-xs text-gray-500">{product.description}</p>
-                </div>
-              </div>
-              <PlusSignCircleIcon size={20} className="text-gray-400" />
+          {productOptions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-sm">Product applications are currently unavailable.</p>
+              <p className="text-gray-400 text-xs mt-2">Please check back later.</p>
             </div>
-          ))}
+          ) : (
+            productOptions.map((product, idx) => (
+              <div
+                key={idx}
+                className="flex justify-between items-center px-4 py-4 border border-gray-200 rounded-2xl shadow-sm bg-gray-50 hover:shadow-md transition duration-150 cursor-pointer"
+                onClick={() => handleApplyClick(product.route)}
+              >
+                <div className="flex gap-4 items-center">
+                  <div className="text-blue-600 bg-blue-100 p-2 rounded-full">
+                    {product.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">{product.name}</p>
+                    <p className="text-xs text-gray-500">{product.description}</p>
+                  </div>
+                </div>
+                <PlusSignCircleIcon size={20} className="text-gray-400" />
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

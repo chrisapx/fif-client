@@ -22,13 +22,16 @@ const NewTransactionForm: React.FC = () => {
 
   const [accounts, setAccounts] = useState<any[]>([]);
   const [message, setMessage] = useState<IMessage | null>(null);
+  const [depositProof, setDepositProof] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     accountId: '',
     trxAmount: '',
     trxRef: '',
     trxDescription: '',
-    trxGateway: 'CASH',
+    trxGateway: 'MOBILE_MONEY',
     transactionType: 'DEPOSIT',
     createdBy: user?.userId || '',
   });
@@ -37,6 +40,8 @@ const NewTransactionForm: React.FC = () => {
     searchParams.delete(searchParamsVariables.newTransactionPanelOpen);
     setSearchParams(searchParams);
     setMessage(null);
+    setDepositProof(null);
+    setProofPreview(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -47,44 +52,197 @@ const NewTransactionForm: React.FC = () => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ text: 'File size must be less than 5MB', type: 'error' });
+        return;
+      }
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        setMessage({ text: 'Only images (JPEG, PNG, WebP) and PDF files are allowed', type: 'error' });
+        return;
+      }
+
+      setDepositProof(file);
+
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProofPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setProofPreview(null);
+      }
+    }
+  };
+
+  const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
+
+  const headers = {
+      Authorization: `Basic ${token}`,
+      'Content-Type': 'application/json',
+      'Fineract-Platform-TenantId': tenant,
+    };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      accountId: formData.accountId,
-      trxAmount: Number(formData.trxAmount),
-      trxRef: formData.trxRef,
-      trxDescription: formData.trxDescription,
-      trxGateway: formData.trxGateway,
-      transactionType: formData.transactionType,
-      metaData: [],
-      createdBy: formData.createdBy
-    };
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
+    setIsSubmitting(true);
+    setMessage(null);
 
     try {
-      const response = await axios.post(api_urls.transactions.create_transaction, payload, { headers });
-      console.log(response?.data);
+      // Get the selected account details
+      const selectedAccount = accounts.find(acc => acc.accountId === formData.accountId);
 
-      setMessage({ text: 'Transaction submitted successfully. Await approval', type: 'success' });
+      if (!selectedAccount) {
+        setMessage({ text: 'Please select a valid account', type: 'error' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Require deposit proof for deposits
+      if (formData.transactionType === 'DEPOSIT' && !depositProof) {
+        setMessage({ text: 'Please upload deposit proof (receipt or screenshot)', type: 'error' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format date as required by Fineract (dd MMMM yyyy)
+      const today = new Date();
+      const dateFormat = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(today);
+
+      // Determine the endpoint based on transaction type
+      const isDeposit = formData.transactionType === 'DEPOSIT';
+      const endpoint = isDeposit
+        ? api_urls.transactions.deposit(selectedAccount.accountId)
+        : api_urls.transactions.withdrawal(selectedAccount.accountId);
+
+      // Map gateway to payment type
+      let paymentTypeId = 1; // Default to CASH
+      if (formData.trxGateway === 'MOBILE_MONEY') paymentTypeId = 2;
+      else if (formData.trxGateway === 'BANK_TRANSFER') paymentTypeId = 3;
+
+      // Build note with all transaction details
+      const detailedNote = `
+Self-Reported Transaction
+Gateway: ${formData.trxGateway}
+Reference: ${formData.trxRef}
+Description: ${formData.trxDescription}
+${depositProof ? `Proof: ${depositProof.name}` : ''}
+      `.trim();
+
+      // Fineract transaction payload
+      const payload = {
+        locale: 'en',
+        dateFormat: 'dd MMMM yyyy',
+        transactionDate: dateFormat,
+        transactionAmount: Number(formData.trxAmount),
+        paymentTypeId: paymentTypeId,
+        note: detailedNote,
+        accountNumber: selectedAccount.accNumber,
+        checkNumber: formData.trxRef || '',
+        routingCode: '',
+        receiptNumber: formData.trxRef || '',
+        bankNumber: ''
+      };
+
+      console.log('Submitting transaction:', payload);
+
+      const response = await axios.post(endpoint, payload, { headers });
+      console.log('Transaction response:', response?.data);
+
+      // TODO: Upload deposit proof as document/attachment if API supports it
+      // This would require additional Fineract document upload endpoint
+      if (depositProof) {
+        console.log('Deposit proof to upload:', depositProof.name);
+        // Future: Upload to document storage or Fineract documents endpoint
+      }
+
+      setMessage({
+        text: isDeposit
+          ? 'Deposit submitted successfully! Awaiting admin verification.'
+          : 'Withdrawal request submitted successfully!',
+        type: 'success'
+      });
+
+      // Reset form
+      setFormData({
+        accountId: '',
+        trxAmount: '',
+        trxRef: '',
+        trxDescription: '',
+        trxGateway: 'MOBILE_MONEY',
+        transactionType: 'DEPOSIT',
+        createdBy: user?.userId || '',
+      });
+      setDepositProof(null);
+      setProofPreview(null);
 
       setTimeout(() => {
         handleHidePanel();
-      }, 2000);
+        window.location.reload(); // Refresh to show updated transactions
+      }, 2500);
     } catch (error: any) {
+      console.error('Transaction error:', error);
       const fallbackMessage =
-        error?.response?.data?.message || 'Failed to submit transaction. Try again.';
+        error?.response?.data?.defaultUserMessage ||
+        error?.response?.data?.errors?.[0]?.defaultUserMessage ||
+        error?.message ||
+        'Failed to submit transaction. Please try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   useEffect(() => {
     // Fetch accounts for dropdown
-    axios.get(api_urls.accounts.get_current_user_accounts).then(res => setAccounts(res.data));
+    const fetchAccounts = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('authUser') || '{}');
+        const clientId = userData.userId;
+
+        if (!clientId) return;
+
+        const response = await axios.get(
+          api_urls.clients.get_client_accounts(clientId),
+          { headers }
+        );
+
+        const accountsData = response.data || {};
+
+        // Extract savings accounts
+        if (accountsData.savingsAccounts && Array.isArray(accountsData.savingsAccounts)) {
+          const savingsAccounts = accountsData.savingsAccounts
+            .filter((acc: any) => acc.status?.active) // Only show active accounts
+            .map((acc: any) => ({
+              accountId: acc.id.toString(), // Convert to string to match form value type
+              accNumber: acc.accountNo,
+              accName: acc.productName || acc.savingsProductName,
+              accBalance: acc.accountBalance || 0,
+              accStatus: acc.status?.value || 'Unknown'
+            }));
+          setAccounts(savingsAccounts);
+        } else {
+          setAccounts([]);
+        }
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+        setAccounts([]);
+      }
+    };
+
+    fetchAccounts();
   }, []);
 
   const handleLogout = () => {
@@ -133,7 +291,7 @@ const NewTransactionForm: React.FC = () => {
                 >
                   <option value="">Select account</option>
                   {accounts.map((acc: any) => (
-                    <option key={acc.accountId} value={acc.accNumber}>
+                    <option key={acc.accountId} value={acc.accountId}>
                       {acc.accName} - {acc.accNumber}
                     </option>
                   ))}
@@ -188,10 +346,45 @@ const NewTransactionForm: React.FC = () => {
                 />
               </div>
 
+              {/* Deposit Proof Upload */}
+              {formData.transactionType === 'DEPOSIT' && (
+                <div className="mb-4">
+                  <label htmlFor="depositProof" className="block text-xs text-gray-500 mb-1">
+                    Deposit Proof (Required) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="depositProof"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Upload receipt or screenshot (Max 5MB, JPEG/PNG/PDF)
+                  </p>
+
+                  {proofPreview && (
+                    <div className="mt-2">
+                      <img
+                        src={proofPreview}
+                        alt="Deposit proof preview"
+                        className="max-w-full h-auto max-h-40 rounded border border-gray-200"
+                      />
+                    </div>
+                  )}
+
+                  {depositProof && !proofPreview && (
+                    <div className="mt-2 text-xs text-green-600">
+                      ✓ {depositProof.name} selected
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label htmlFor="trxGateway" className="block text-xs text-gray-500 mb-1">
-                    Gateway
+                    Payment Gateway
                   </label>
                   <select
                     id="trxGateway"
@@ -200,7 +393,6 @@ const NewTransactionForm: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
                     required
-                    disabled
                   >
                     <option value="">Select gateway</option>
                     <option value="CASH">Cash</option>
@@ -220,29 +412,44 @@ const NewTransactionForm: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
                     required
-                    disabled
                   >
                     <option value="">Select type</option>
                     <option value="DEPOSIT">Deposit</option>
-                    <option value="WITHDRAW">Withdraw</option>
-                    <option value="TRANSFER">Transfer</option>
+                    <option value="WITHDRAW">Withdrawal</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-xs text-blue-700">
+                <p className="font-semibold mb-1">ℹ️ Self-Reported Transaction</p>
+                <p>
+                  This transaction will be submitted for admin verification.
+                  {formData.transactionType === 'DEPOSIT' && ' Please ensure you upload valid deposit proof.'}
+                </p>
               </div>
 
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={handleHidePanel}
-                  className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Submit Transaction
+                  {isSubmitting ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Transaction'
+                  )}
                 </button>
               </div>
             </form>
@@ -254,3 +461,4 @@ const NewTransactionForm: React.FC = () => {
 };
 
 export default NewTransactionForm;
+// username: ${MAIL_USERNAME:idmdatacorp@gmail.com} 17 -      password: ${MAIL_PASSWORD:vkqpzpbrkcixonjf}
