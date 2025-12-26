@@ -16,8 +16,12 @@ import FundMyAccount from "./client/pages/FundMyAccount"
 import NewTransactionForm from "./client/components/forms/NewTransactionForm"
 import MobileOnlyWrapper from "./components/MobileOnlyWrapper"
 import Welcome from "./client/pages/Welcome"
+import { useSessionManager } from "./hooks/useSessionManager"
 
 function App() {
+  // Initialize session manager (5min session, 30sec inactivity timeout)
+  useSessionManager();
+
   return (
     <MobileOnlyWrapper>
       <Routes>

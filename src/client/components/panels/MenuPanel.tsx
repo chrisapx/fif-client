@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
 import { Logout05Icon, Home04Icon, UserAccountIcon, File01Icon, More01Icon, MoneyExchange01Icon, ArrowDataTransferVerticalIcon } from 'hugeicons-react';
 import { getAuthUser, logout, getAvailableAccounts, switchAccount } from '../../../utilities/AuthCookieManager';
+import { sessionManager } from '../../../utilities/SessionManager';
 
 const MenuPanel: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,8 +31,11 @@ const MenuPanel: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // Destroy session (clears timers and localStorage)
+    sessionManager.destroy();
+    // Also call logout to ensure cleanup
     logout();
-    navigate('/login')
+    navigate('/login');
   }
 
   const handleSwitchAccount = (accountIndex: number) => {
