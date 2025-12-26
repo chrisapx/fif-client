@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom"
 import Home from "./client/pages/Home"
-import Welcome from "./client/pages/Welcome"
 import Login from "./client/pages/Login"
 import SelectAccount from "./client/pages/SelectAccount"
 import Loans from "./client/pages/Loans"
@@ -15,12 +14,14 @@ import MoreActions from "./client/pages/MoreActions"
 import CreateUserAccount from "./client/components/forms/CreateUserAccount"
 import FundMyAccount from "./client/pages/FundMyAccount"
 import NewTransactionForm from "./client/components/forms/NewTransactionForm"
+import MobileOnlyWrapper from "./components/MobileOnlyWrapper"
+import Welcome from "./client/pages/Welcome"
 
 function App() {
   return (
-    <>
+    <MobileOnlyWrapper>
       <Routes>
-        <Route index element={<Home/>}/>
+        <Route index element={<Welcome/>}/>
         <Route path="/home" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/select-account" element={<SelectAccount/>}/>
@@ -37,7 +38,7 @@ function App() {
       {/* Temporarily disabled - will be enabled later */}
       {/* <LoanRequestForm/> */}
       {/* <NewAccountForm/> */}
-    </>
+    </MobileOnlyWrapper>
   )
 }
 

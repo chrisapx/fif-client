@@ -3,7 +3,6 @@ import { Sidebar } from 'primereact/sidebar';
 import { useSearchParams } from 'react-router-dom';
 import { Logout05Icon } from 'hugeicons-react';
 import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
-import { InputText } from 'primereact/inputtext';
 import { getAuthUser, getUserToken } from '../../../utilities/AuthCookieManager';
 import axios from 'axios';
 import { api_urls } from '../../../utilities/api_urls';
@@ -18,7 +17,6 @@ const LoanRequestForm = () => {
   const panelStatus = searchParams.get(searchParamsVariables.loanRequestPanelOpen);
 
   const user = getAuthUser();
-  const defaultGroup = 'Family Investment Fund';
 
   const [loanProducts, setLoanProducts] = useState<any[]>([]);
   const [message, setMessage] = useState<IMessage | null>(null);

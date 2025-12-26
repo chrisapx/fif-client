@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { searchParamsVariables } from '../../../utilities/UrlParamVariables';
-import { Logout05Icon, Home04Icon, UserAccountIcon, File01Icon, MoneySend01Icon, More01Icon, MoneyExchange01Icon, ArrowDataTransferVerticalIcon } from 'hugeicons-react';
+import { Logout05Icon, Home04Icon, UserAccountIcon, File01Icon, More01Icon, MoneyExchange01Icon, ArrowDataTransferVerticalIcon } from 'hugeicons-react';
 import { getAuthUser, logout, getAvailableAccounts, switchAccount } from '../../../utilities/AuthCookieManager';
 
 const MenuPanel: React.FC = () => {

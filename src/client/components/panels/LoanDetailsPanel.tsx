@@ -24,25 +24,6 @@ const LoanDetailsPanel = () => {
     setSearchParams(searchParams);
   };
 
-  const handleOpenLoanRequestForm = () => {
-    handleHideLoanPanel();
-    searchParams.set(searchParamsVariables.loanRequestPanelOpen, '1');
-    setSearchParams(searchParams);
-  };
-
-  const formatDueDate = (dateDispatched: Date, loanDuration: number) => {
-    const dueDate = new Date(dateDispatched);
-    dueDate.setMonth(dueDate.getMonth() + loanDuration);
-    const day = dueDate.getDate();
-    const month = dueDate.toLocaleString('en-US', { month: 'short' });
-    const year = dueDate.getFullYear();
-    const ordinal =
-      day % 10 === 1 && day !== 11 ? 'st' :
-      day % 10 === 2 && day !== 12 ? 'nd' :
-      day % 10 === 3 && day !== 13 ? 'rd' : 'th';
-    return `${day}${ordinal} ${month}, ${year}`;
-  };
-
   const formatDate = (date: Date | number[]) => {
     if (!date) return '--';
 

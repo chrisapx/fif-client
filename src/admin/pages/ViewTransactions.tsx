@@ -14,10 +14,10 @@ const ViewTransactions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isApprovalLoading, setIsApprovalLoading] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
   const [message, setMessage] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [isApprovalLoading, setIsApprovalLoading] = useState<string>('');
 
   const getIconAndColor = (type: string) => {
     switch (type?.toLowerCase()) {
@@ -136,8 +136,12 @@ const ViewTransactions = () => {
   const handleApprove = async (trxId: string) => {
     // Note: In Fineract, savings transactions are posted immediately
     // This function is kept for compatibility but won't do anything in standard Fineract
+    setIsApprovalLoading(trxId);
     setMessage('Transactions in Fineract are posted immediately and do not require approval.');
-    setTimeout(() => setMessage(''), 3000);
+    setTimeout(() => {
+      setMessage('');
+      setIsApprovalLoading('');
+    }, 3000);
   };
 
   const tabs = [

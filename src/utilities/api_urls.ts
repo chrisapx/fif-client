@@ -84,7 +84,24 @@ const api_urls = {
         offices: `${FINERACT_API_URL}/offices`,
         staff: `${FINERACT_API_URL}/staff`,
         payment_types: `${FINERACT_API_URL}/paymenttypes`,
-        codes: `${FINERACT_API_URL}/codes`
+        codes: `${FINERACT_API_URL}/codes`,
+        get_account_branches: `${FINERACT_API_URL}/offices`
+    },
+
+    // Admin/Staff endpoints (placeholders for admin functionality)
+    users: {
+        get_users: `${FINERACT_API_URL}/users`,
+        get_user: (userId: string) => `${FINERACT_API_URL}/users/${userId}`,
+        create_user: `${FINERACT_API_URL}/users`,
+        verify_otp: `${FINERACT_API_URL}/users/verify-otp`
+    },
+
+    // Bank accounts (placeholders for admin functionality)
+    accounts: {
+        create_bank_account: `${FINERACT_API_URL}/savingsaccounts`,
+        get_accounts: `${FINERACT_API_URL}/savingsaccounts`,
+        approve_account: (accountId: string) => `${FINERACT_API_URL}/savingsaccounts/${accountId}?command=approve`,
+        activate_account: (accountId: string) => `${FINERACT_API_URL}/savingsaccounts/${accountId}?command=activate`
     },
 
     // Reports

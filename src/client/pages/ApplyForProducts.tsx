@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PlusSignCircleIcon, Money01Icon } from 'hugeicons-react';
+import { PlusSignCircleIcon } from 'hugeicons-react';
 import Header from '../components/Header';
 import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 
-const productOptions = [
+const productOptions: any[] = [
   // Temporarily disabled - will be enabled later
   // {
   //   name: 'Open New Savings Account',

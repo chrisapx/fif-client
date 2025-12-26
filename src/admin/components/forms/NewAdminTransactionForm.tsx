@@ -83,7 +83,7 @@ const NewAdminTransactionForm: React.FC = () => {
         receiptNumber: formData.trxRef || ''
       };
 
-      const response = await axios.post(endpoint, payload, { headers });
+      await axios.post(endpoint, payload, { headers });
 
       setMessage({
         text: `${isDeposit ? 'Deposit' : 'Withdrawal'} posted successfully!`,

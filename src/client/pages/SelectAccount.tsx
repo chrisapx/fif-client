@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BankIcon, UserCircle02Icon } from 'hugeicons-react';
+import { UserCircle02Icon } from 'hugeicons-react';
 import { getAuthUser, setAuthUser } from '../../utilities/AuthCookieManager';
 
 const SelectAccount: React.FC = () => {
