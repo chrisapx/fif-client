@@ -20,20 +20,14 @@ const NewAccountForm: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const panelStatus = searchParams.get(searchParamsVariables.newAccountPanelOpen);
 
-  const [branches, setBranches] = useState<any[]>([]);
-  const [accountTypes, setAccountTypes] = useState<any[]>([]);
-
+  const [savingsProducts, setSavingsProducts] = useState<any[]>([]);
   const [message, setMessage] = useState<IMessage | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const [formData, setFormData] = useState({
-    accName: '',
-    commitmentAmount: '',
+    productId: '',
     userId: user?.userId || '',
-    accEmail: user?.email || '',
-    accPhone: user?.phone || '',
-    accBranch: '',
-    accType: '',
-    createdBy: user?.userId || '',
   });
 
   const handleHidePanel = () => {
@@ -48,6 +42,12 @@ const NewAccountForm: React.FC = () => {
       ...prev,
       [name]: value,
     }));
+
+    // When product changes, store the selected product details
+    if (name === 'productId') {
+      const product = savingsProducts.find((p: any) => p.id === Number(value));
+      setSelectedProduct(product);
+    }
   };
 
   const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
@@ -60,24 +60,14 @@ const NewAccountForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
 
     try {
-      // Get savings products first to find matching product
-      let savingsProducts = [];
-      try {
-        const productsResponse = await axios.get(api_urls.templates.savings_products, { headers });
-        savingsProducts = productsResponse.data?.savingsProductOptions || productsResponse.data || [];
-      } catch (productError) {
-        console.warn('Could not fetch savings products. Using defaults.');
-        // If we can't fetch products, we'll create a basic account request
-      }
-
-      // Use the first available savings product or match by type
-      let selectedProduct = null;
-      if (savingsProducts.length > 0) {
-        selectedProduct = savingsProducts.find((p: any) =>
-          p.name?.toLowerCase().includes('savings')
-        ) || savingsProducts[0];
+      if (!selectedProduct) {
+        setMessage({ text: 'Please select a savings product', type: 'error' });
+        setIsSubmitting(false);
+        return;
       }
 
       // Format date as required by Fineract
@@ -91,24 +81,18 @@ const NewAccountForm: React.FC = () => {
       // Fineract savings account payload
       const payload: any = {
         clientId: Number(formData.userId),
+        productId: Number(formData.productId),
         locale: 'en',
         dateFormat: 'dd MMMM yyyy',
         submittedOnDate: dateFormat,
       };
 
-      // Add product details if available
-      if (selectedProduct) {
-        payload.productId = selectedProduct.id;
-        payload.nominalAnnualInterestRate = selectedProduct.nominalAnnualInterestRate || 5;
-        payload.interestCompoundingPeriodType = selectedProduct.interestCompoundingPeriodType || 1;
-        payload.interestPostingPeriodType = selectedProduct.interestPostingPeriodType || 4;
-        payload.interestCalculationType = selectedProduct.interestCalculationType || 1;
-        payload.interestCalculationDaysInYearType = selectedProduct.interestCalculationDaysInYearType || 365;
-      } else {
-        // Fallback: provide reasonable defaults
-        setMessage({ text: 'Using default savings product configuration.', type: 'warn' });
-      }
-
+      // Add product details from selected product
+      payload.nominalAnnualInterestRate = selectedProduct.nominalAnnualInterestRate || 5;
+      payload.interestCompoundingPeriodType = selectedProduct.interestCompoundingPeriodType?.id || 1;
+      payload.interestPostingPeriodType = selectedProduct.interestPostingPeriodType?.id || 4;
+      payload.interestCalculationType = selectedProduct.interestCalculationType?.id || 1;
+      payload.interestCalculationDaysInYearType = selectedProduct.interestCalculationDaysInYearType?.id || 365;
       payload.withdrawalFeeForTransfers = false;
       payload.allowOverdraft = false;
       payload.enforceMinRequiredBalance = false;
@@ -120,72 +104,71 @@ const NewAccountForm: React.FC = () => {
         { headers }
       );
 
-      console.log('Account created:', response?.data);
+      console.log('Savings account application submitted:', response?.data);
 
-      // Note: Self-service users cannot approve/activate accounts
-      // These must be done by staff/admin through the admin panel
       setMessage({
-        text: 'Savings account application submitted! It will be activated by admin.',
+        text: 'Savings account application submitted successfully! Awaiting approval from admin.',
         type: 'success',
       });
 
       // Reset form
       setFormData({
-        accName: '',
-        commitmentAmount: '',
+        productId: '',
         userId: user?.userId || '',
-        accEmail: user?.email || '',
-        accPhone: user?.phone || '',
-        accBranch: '',
-        accType: '',
-        createdBy: user?.userId || '',
       });
+      setSelectedProduct(null);
 
       setTimeout(() => {
         handleHidePanel();
-      }, 3000);
+        // Optionally reload to show new account
+        window.location.reload();
+      }, 2500);
     } catch (error: any) {
       console.error('Account creation error:', error);
       const fallbackMessage =
         error?.response?.data?.defaultUserMessage ||
         error?.response?.data?.errors?.[0]?.defaultUserMessage ||
         error?.message ||
-        'Failed to create account. Try again.';
+        'Failed to create account. Please check your inputs and try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   useEffect(() => {
-    const fetchTemplateData = async () => {
-      try {
-        // Try to fetch offices (may not be accessible for self-service users)
-        // try {
-        //   const officesResponse = await axios.get(api_urls.templates.offices, { headers });
-        //   if (officesResponse.data && Array.isArray(officesResponse.data)) {
-        //     setBranches(officesResponse.data.map((office: any) => office.name));
-        //   } else {
-        //     // Fallback to default branch
-        //     setBranches(['Head Office']);
-        //   }
-        // } catch (officesError) {
-        //   console.warn('Could not fetch offices (self-service users may not have access). Using default branch.');
-        //   // Fallback: Use default branch
-        //   setBranches(['Head Office']);
-        // }
-        setBranches(['Head Office']); // Temporarily disable office fetching
+    const fetchSavingsProducts = async () => {
+      if (panelStatus !== '1' || !formData.userId) return;
 
-        // Set account types (hardcoded as self-service may not have access to account type templates)
-        setAccountTypes(['SAVINGS', 'INVESTMENTS']);
+      try {
+        // Fetch savings products with clientId parameter
+        const url = formData.userId
+          ? `${api_urls.templates.savings_products}?clientId=${formData.userId}`
+          : api_urls.templates.savings_products;
+
+        const response = await axios.get(url, { headers });
+
+        // The response should be an array of savings products
+        const products = Array.isArray(response.data) ? response.data : [];
+        setSavingsProducts(products);
+
+        if (products.length === 0) {
+          setMessage({
+            text: 'No savings products available. Please contact admin.',
+            type: 'warn'
+          });
+        }
       } catch (error) {
-        console.error('Error fetching template data:', error);
-        // Ensure we have fallback values even if everything fails
-        setBranches(['Head Office']);
-        setAccountTypes(['SAVINGS', 'INVESTMENTS']);
+        console.error('Error fetching savings products:', error);
+        setMessage({
+          text: 'Failed to load savings products. Please try again.',
+          type: 'error'
+        });
       }
     };
 
-    fetchTemplateData();
-  }, []);
+    fetchSavingsProducts();
+  }, [panelStatus, formData.userId]);
 
   const handleLogout = () => {
     logout();
@@ -212,6 +195,8 @@ const NewAccountForm: React.FC = () => {
                   className={`mb-4 px-3 py-2 text-sm rounded border ${
                     message.type === 'success'
                       ? 'bg-green-50 text-green-700 border-green-200'
+                      : message.type === 'warn'
+                      ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
                       : 'bg-red-50 text-red-700 border-red-200'
                   }`}
                 >
@@ -219,109 +204,52 @@ const NewAccountForm: React.FC = () => {
                 </div>
               )}
 
-              <div className="mb-4">
-                <label htmlFor="accName" className="block text-xs text-gray-500 mb-1">
-                  Account Name
-                </label>
-                <input
-                  type="text"
-                  id="accName"
-                  name="accName"
-                  placeholder='E.g. Annual savings for car'
-                  value={formData.accName}
-                  onChange={handleInputChange}
-                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="commitmentAmount" className="block text-xs text-gray-500 mb-1">
-                  Monthly Commitment Amount
-                </label>
-                <input
-                  type="number"
-                  id="commitmentAmount"
-                  name="commitmentAmount"
-                  placeholder='Monthly commitnent amount e.g. 450,000'
-                  value={formData.commitmentAmount}
-                  onChange={handleInputChange}
-                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="accEmail" className="block text-xs text-gray-500 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="accEmail"
-                    name="accEmail"
-                    value={formData.accEmail}
-                    onChange={handleInputChange}
-                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="accPhone" className="block text-xs text-gray-500 mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    id="accPhone"
-                    name="accPhone"
-                    value={formData.accPhone}
-                    onChange={handleInputChange}
-                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="accBranch" className="block text-xs text-gray-500 mb-1">
-                  Branch
-                </label>
-                <select
-                  id="accBranch"
-                  name="accBranch"
-                  value={formData.accBranch}
-                  onChange={handleInputChange}
-                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
-                  required
-                >
-                  <option value="">Select branch</option>
-                  {branches.map((branch: any, i) => (
-                    <option key={i} value={branch}>
-                      {branch}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="mb-6">
-                <label htmlFor="accType" className="block text-xs text-gray-500 mb-1">
-                  Account Type
+                <label htmlFor="productId" className="block text-xs text-gray-500 mb-1">
+                  Savings Product
                 </label>
                 <select
-                  id="accType"
-                  name="accType"
-                  value={formData.accType}
+                  id="productId"
+                  name="productId"
+                  value={formData.productId}
                   onChange={handleInputChange}
                   className="w-full text-sm px-3 py-2 border border-gray-300 rounded"
                   required
+                  disabled={isSubmitting || savingsProducts.length === 0}
                 >
-                  <option value="">Select type</option>
-                  {accountTypes.map((type: any, i) => (
-                    <option key={i} value={type}>
-                      {type.replace(/^IL_/, '').replace(/_/g, ' ')}
+                  <option value="">Select savings product</option>
+                  {savingsProducts.map((product: any) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
                     </option>
                   ))}
                 </select>
+                {selectedProduct && (
+                  <div className='mt-2 p-3 bg-blue-50 rounded text-xs space-y-1'>
+                    <p className='text-gray-700'>
+                      <span className='font-semibold'>Interest Rate:</span> {selectedProduct.nominalAnnualInterestRate || 0}% per annum
+                    </p>
+                    {selectedProduct.description && (
+                      <p className='text-gray-600 text-xs'>
+                        {selectedProduct.description}
+                      </p>
+                    )}
+                    {selectedProduct.minRequiredOpeningBalance && (
+                      <p className='text-gray-700'>
+                        <span className='font-semibold'>Min. Opening Balance:</span> {selectedProduct.currency?.displaySymbol || ''}{selectedProduct.minRequiredOpeningBalance}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-6">
+                <p className="text-xs text-gray-600 mb-2 font-semibold">Note:</p>
+                <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                  <li>Your application will be reviewed by an administrator</li>
+                  <li>You will be notified once your account is approved and activated</li>
+                  <li>Once activated, you can start making deposits to your account</li>
+                </ul>
               </div>
 
               <p className="text-xs text-gray-400 mb-4">
@@ -333,14 +261,16 @@ const NewAccountForm: React.FC = () => {
                   type="button"
                   onClick={handleHidePanel}
                   className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600"
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || !formData.productId}
                 >
-                  Submit Application
+                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
                 </button>
               </div>
             </form>

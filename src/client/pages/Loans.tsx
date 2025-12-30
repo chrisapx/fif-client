@@ -91,7 +91,8 @@ const Loans: React.FC = () => {
             return {
               loanId: loan.id,
               accountNo: loan.accountNo,
-              loanName: loan.productName || loan.shortProductName,
+              // Show custom account name if present, otherwise show product name
+              loanName: loan.accountNo || loan.productName || loan.shortProductName,
               loanStatus: loan.status?.value || 'Unknown',
               amountPaid: paidAmount,
               amountUnPaid: balanceAmount,
@@ -178,7 +179,13 @@ const Loans: React.FC = () => {
               </div>
               <div className='flex items-center gap-3'>
                 <div className='border border-gray-200 rounded px-3 py-1'>
-                  <p className='text-sm'>{ln?.loanStatus?.replace("_", " ")}</p>
+                  {/* Show "Pending" for pending approval status */}
+                  {ln?.loanStatus?.toLowerCase().includes('pending') ||
+                   ln?.loanStatus?.toLowerCase().includes('submitted') ? (
+                    <p className='text-sm font-semibold text-orange-600'>Pending</p>
+                  ) : (
+                    <p className='text-sm'>{ln?.loanStatus?.replace("_", " ")}</p>
+                  )}
                   <p className='text-[10px] font-[200]'>
                     {ln?.maturityDate && (() => {
                       const dueDate = new Date(ln.maturityDate);

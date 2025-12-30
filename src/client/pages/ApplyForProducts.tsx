@@ -1,23 +1,24 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PlusSignCircleIcon } from 'hugeicons-react';
+import { PlusSignCircleIcon, MoneySavingJarIcon, FileDollarIcon } from 'hugeicons-react';
 import Header from '../components/Header';
 import { searchParamsVariables } from '../../utilities/UrlParamVariables';
+import LoanRequestForm from '../components/forms/LoanRequestForm';
+import NewAccountForm from '../components/forms/NewAccountForm';
 
 const productOptions: any[] = [
-  // Temporarily disabled - will be enabled later
-  // {
-  //   name: 'Open New Savings Account',
-  //   description: 'Start saving with high interest and flexible withdrawals.',
-  //   icon: <Money01Icon size={28} />,
-  //   route: 'apply-account',
-  // },
-  // {
-  //   name: 'Apply for a Loan',
-  //   description: 'Get loans tailored to your needs with flexible terms.',
-  //   icon: <File01Icon size={28} />,
-  //   route: 'apply-loan',
-  // },
+  {
+    name: 'Open New Savings Account',
+    description: 'Start saving with high interest and flexible withdrawals.',
+    icon: <MoneySavingJarIcon size={28} />,
+    route: 'apply-account',
+  },
+  {
+    name: 'Apply for a Loan',
+    description: 'Get loans tailored to your needs with flexible terms.',
+    icon: <FileDollarIcon size={28} />,
+    route: 'apply-loan',
+  },
 ];
 
 const ApplyForProducts: React.FC = () => {
@@ -77,6 +78,10 @@ const ApplyForProducts: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Forms */}
+      <LoanRequestForm />
+      <NewAccountForm />
     </div>
   );
 };

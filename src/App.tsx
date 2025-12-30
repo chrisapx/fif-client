@@ -5,9 +5,8 @@ import SelectAccount from "./client/pages/SelectAccount"
 import Loans from "./client/pages/Loans"
 import History from "./client/pages/History"
 import ApplyForProducts from "./client/pages/ApplyForProducts"
-// Temporarily disabled - will be enabled later
-// import LoanRequestForm from "./client/components/forms/LoanRequestForm"
-// import NewAccountForm from "./client/components/forms/NewAccountForm"
+import LoanRequestForm from "./client/components/forms/LoanRequestForm"
+import NewAccountForm from "./client/components/forms/NewAccountForm"
 import Profile from "./client/pages/Profile"
 import Transactions from "./client/pages/Transactions"
 import MoreActions from "./client/pages/MoreActions"
@@ -16,11 +15,12 @@ import FundMyAccount from "./client/pages/FundMyAccount"
 import NewTransactionForm from "./client/components/forms/NewTransactionForm"
 import MobileOnlyWrapper from "./components/MobileOnlyWrapper"
 import Welcome from "./client/pages/Welcome"
-import { useSessionManager } from "./hooks/useSessionManager"
+import SavingsProducts from "./client/pages/SavingsProducts"
+// import { useSessionManager } from "./hooks/useSessionManager"
 
 function App() {
   // Initialize session manager (5min session, 30sec inactivity timeout)
-  useSessionManager();
+  // useSessionManager();
 
   return (
     <MobileOnlyWrapper>
@@ -36,12 +36,12 @@ function App() {
         <Route path="/transactions" element={<Transactions/>}/>
         <Route path="/more" element={<MoreActions/>}/>
         <Route path="/apply-products" element={<ApplyForProducts/>}/>
+        <Route path="/savings-products" element={<SavingsProducts/>}/>
         <Route path="fund-account" element={<FundMyAccount/>} />
       </Routes>
       <NewTransactionForm/>
-      {/* Temporarily disabled - will be enabled later */}
-      {/* <LoanRequestForm/> */}
-      {/* <NewAccountForm/> */}
+      <LoanRequestForm/>
+      <NewAccountForm/>
     </MobileOnlyWrapper>
   )
 }

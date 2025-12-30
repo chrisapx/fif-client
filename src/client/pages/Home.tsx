@@ -8,9 +8,6 @@ import AccountDetailsPanel from '../components/panels/AccountDetailsPanel';
 import { searchParamsVariables } from '../../utilities/UrlParamVariables';
 import { encryptParams } from '../../utilities/EncryptionHelper';
 import LoanDetailsPanel from '../components/panels/LoanDetailsPanel';
-// Temporarily disabled - will be enabled later
-// import LoanRequestForm from '../components/forms/LoanRequestForm';
-// import { getAuthUser, getUserToken } from '../utilities/AuthCookieManager';
 import { api_urls } from '../../utilities/api_urls';
 import axios from 'axios';
 import { getUserToken, isAuthenticated, getAuthUser } from '../../utilities/AuthCookieManager';
@@ -135,13 +132,14 @@ const Home: React.FC = () => {
           return {
             loanId: loan.id,
             accountNo: loan.accountNo,
-            loanName: loan.productName || loan.shortProductName,
+            // Show custom account name if present, otherwise show product name
+            loanName: loan.accountNo || loan.productName || loan.shortProductName,
             loanStatus: loan.status?.value || 'Unknown',
             amountPaid: paidAmount,
             amountUnPaid: balanceAmount,
             totalAmount: originalAmount,
-            interestRate: 0, // Not directly available in this structure
-            loanDuration: durationMonths || 4, // fallback to 4 months
+            interestRate: 0,
+            loanDuration: durationMonths || 4,
             dateDispatched: disbursementDate?.toISOString() || null,
             maturityDate: maturityDate?.toISOString() || null,
             currency: loan.currency?.displaySymbol || 'UGX',
@@ -193,7 +191,7 @@ const Home: React.FC = () => {
             <span className='opacity-50'>
               <InformationCircleIcon size={16}/>
             </span>
-            </p>
+          </p>
           <p className='text-sm text-white'>
             <span className='text-[8px]'>UGX</span> {totalSavings.toLocaleString()}
           </p>
@@ -254,20 +252,24 @@ const Home: React.FC = () => {
               </div>
               <div className='flex items-center gap-3'>
                 <div className='border border-gray-200 rounded px-3 py-1'>
-                  <p className='text-sm'>{ln?.loanStatus?.replace("_"," ")}</p>
+                  {/* Show "Pending" for pending approval status */}
+                  {ln?.loanStatus?.toLowerCase().includes('pending') ||
+                   ln?.loanStatus?.toLowerCase().includes('submitted') ? (
+                    <p className='text-sm font-semibold text-orange-600'>Pending</p>
+                  ) : (
+                    <p className='text-sm'>{ln?.loanStatus?.replace("_"," ")}</p>
+                  )}
                   <p className='text-[10px] font-[200]'>
-                    <span>Due on </span>
-                    {(() => {
-                      const dueDate = new Date(ln?.dateDispatched);
-                      dueDate.setMonth(dueDate.getMonth() + ln.loanDuration);
+                    {ln?.maturityDate && (() => {
+                      const dueDate = new Date(ln.maturityDate);
                       const day = dueDate.getDate();
                       const month = dueDate.toLocaleString('en-US', { month: 'short' });
                       const year = dueDate.getFullYear();
-                      const ordinal = 
+                      const ordinal =
                         day % 10 === 1 && day !== 11 ? 'st' :
                         day % 10 === 2 && day !== 12 ? 'nd' :
                         day % 10 === 3 && day !== 13 ? 'rd' : 'th';
-                      return `${day}${ordinal} ${month}, ${year}`;
+                      return `Due: ${day}${ordinal} ${month}, ${year}`;
                     })()}
                   </p>
                 </div>
@@ -281,8 +283,6 @@ const Home: React.FC = () => {
       <BottomNavigationTabs/>
       <AccountDetailsPanel/>
       <LoanDetailsPanel/>
-      {/* Temporarily disabled - will be enabled later */}
-      {/* <LoanRequestForm/> */}
     </div>
   );
 };

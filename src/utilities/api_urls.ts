@@ -46,6 +46,7 @@ const api_urls = {
         get_loan_with_transactions: (loanId: string) => `${FINERACT_API_URL}/self/loans/${loanId}?associations=transactions`,
         get_loan_with_repayment: (loanId: string) => `${FINERACT_API_URL}/self/loans/${loanId}?associations=repaymentSchedule`,
         template: `${FINERACT_API_URL}/self/loans/template`,
+        withdraw_loan: (loanId: string) => `${FINERACT_API_URL}/self/loans/${loanId}?command=withdrawnByApplicant`,
 
         // Staff endpoints (not accessible for self-service)
         approve_loan: (loanId: string) => `${FINERACT_API_URL}/loans/${loanId}?command=approve`,
@@ -76,8 +77,8 @@ const api_urls = {
     // Templates and reference data (Self-service endpoints)
     templates: {
         savings_products: `${FINERACT_API_URL}/self/savingsproducts`,
-        // Note: self/loanproducts doesn't exist, use loans template instead
-        loan_products: `${FINERACT_API_URL}/self/loans/template?clientId=${clientId}`,
+        savings_products_with_client: (clientId: string) => `${FINERACT_API_URL}/self/savingsproducts?clientId=${clientId}`,
+        loan_products: (clientId: string) => `${FINERACT_API_URL}/self/loanproducts?clientId=${clientId}`,
         loan_products_template: (clientId: string) => `${FINERACT_API_URL}/self/loans/template?clientId=${clientId}`,
 
         // Staff endpoints (not accessible for self-service users - will use fallbacks)
