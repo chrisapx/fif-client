@@ -111,7 +111,7 @@ const LoanRequestForm = () => {
           loanAmount: loanData.principal?.toString() || '',
           numberOfRepayments: loanData.numberOfRepayments?.toString() || '4',
           repaymentEvery: loanData.repaymentEvery?.toString() || '1',
-          accountName: loanData.accountNo || '',
+          accountName: loanData.externalId || '',
           expectedDisbursementDate: expectedDate,
           loanType: loanData.loanType?.value?.toLowerCase() || 'individual',
           clientId: user?.userId || '',
@@ -189,8 +189,8 @@ const LoanRequestForm = () => {
         dateFormat: 'dd MMMM yyyy',
         submittedOnDate: dateFormat,
         expectedDisbursementDate: expectedDisbursementDateFormatted,
-        // Use custom product name if provided, otherwise let the system generate default
-        ...(formData.accountName && { productName: formData.accountName }),
+        // Use externalId for custom loan identification if provided
+        ...(formData.accountName && { externalId: formData.accountName }),
       };
 
       let response;

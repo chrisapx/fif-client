@@ -135,7 +135,7 @@ const History = () => {
               transactionType: trx.type?.disbursement ? 'DISBURSEMENT' : 'REPAYMENT',
               accountType: 'LOAN',
               accountId: loan.accountNo,
-              accountName: loan.productName || loan.shortProductName,
+              accountName: loan.externalId || loan.productName || loan.shortProductName,
               createdAt: trx.date || trx.submittedOnDate,
               trxStatus: trx.reversed ? 'REVERSED' : 'COMPLETED',
               currency: trx.currency?.displaySymbol || 'UGX'

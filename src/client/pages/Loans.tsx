@@ -92,7 +92,7 @@ const Loans: React.FC = () => {
               loanId: loan.id,
               accountNo: loan.accountNo,
               // Show custom account name if present, otherwise show product name
-              loanName: loan.accountNo || loan.productName || loan.shortProductName,
+              loanName: loan.externalId || loan.accountNo || loan.productName || loan.shortProductName,
               loanStatus: loan.status?.value || 'Unknown',
               amountPaid: paidAmount,
               amountUnPaid: balanceAmount,
