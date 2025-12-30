@@ -568,12 +568,16 @@ const LoanRequestForm = () => {
                 <button
                   type='submit'
                   disabled={isSubmitting}
-                  className='px-6 py-3 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='px-6 py-3 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
                 >
-                  {isSubmitting
-                    ? (isEditMode ? 'Updating...' : 'Submitting...')
-                    : (isEditMode ? 'Update Application' : 'Submit Application')
-                  }
+                  {isSubmitting ? (
+                    <>
+                      <i className='pi pi-spin pi-spinner' style={{ fontSize: '0.875rem' }}></i>
+                      {isEditMode ? 'Updating...' : 'Submitting...'}
+                    </>
+                  ) : (
+                    isEditMode ? 'Update Application' : 'Submit Application'
+                  )}
                 </button>
               </div>
             </form>

@@ -267,10 +267,17 @@ const NewAccountForm: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   disabled={isSubmitting || !formData.productId}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                  {isSubmitting ? (
+                    <>
+                      <i className="pi pi-spin pi-spinner" style={{ fontSize: '0.875rem' }}></i>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Application'
+                  )}
                 </button>
               </div>
             </form>

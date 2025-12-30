@@ -72,7 +72,16 @@ const Loans: React.FC = () => {
 
         // Extract loan accounts
         if (accountsData.loanAccounts) {
-          const loanAccounts = accountsData.loanAccounts.map((loan: any) => {
+          // Filter out withdrawn, rejected, and closed loans
+          const activeLoanAccounts = accountsData.loanAccounts.filter((loan: any) => {
+            const status = loan.status?.value?.toLowerCase() || '';
+            const statusCode = loan.status?.code?.toLowerCase() || '';
+            // Exclude withdrawn, rejected, closed, overpaid, and written off loans
+            const excludedStatuses = ['withdrawn', 'rejected', 'closed', 'overpaid', 'writeoff', 'written'];
+            return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+          });
+
+          const loanAccounts = activeLoanAccounts.map((loan: any) => {
             const disbursementDate = convertArrayToDate(loan.timeline?.actualDisbursementDate);
             const maturityDate = convertArrayToDate(loan.timeline?.actualMaturityDate || loan.timeline?.expectedMaturityDate);
 

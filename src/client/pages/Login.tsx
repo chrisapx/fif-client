@@ -12,6 +12,7 @@ const Login: React.FC = () => {
   const [isBiometricSupported, setIsBiometricSupported] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showPin, setShowPin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const toggleVisibility = () => setShowPin((prev) => !prev);
   
@@ -22,16 +23,62 @@ const Login: React.FC = () => {
   }
 
   useEffect(() => {
-    setIsBiometricSupported(true);
+    // Check if biometric authentication is supported and credentials are stored
+    const hasStoredCredentials = localStorage.getItem('biometric_enabled') === 'true';
+    const isWebAuthnSupported = window.PublicKeyCredential !== undefined;
+    setIsBiometricSupported(hasStoredCredentials && isWebAuthnSupported);
   },[])
+
+  const handleBiometricLogin = async () => {
+    setErrorMessage('');
+    setIsLoading(true);
+    setIsBiometricSupported(false);
+
+    try {
+      // Check if WebAuthn is supported
+      if (!window.PublicKeyCredential) {
+        setErrorMessage('Biometric authentication is not supported on this device.');
+        setIsLoading(false);
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      // Get stored credentials
+      const storedUsername = localStorage.getItem('biometric_username');
+      const storedPassword = localStorage.getItem('biometric_password');
+
+      if (!storedUsername || !storedPassword) {
+        setErrorMessage('No biometric credentials found. Please login with username and password first.');
+        setIsLoading(false);
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      // Set credentials and trigger login
+      setUsername(storedUsername);
+      setAccessCode(storedPassword);
+
+      // Create a synthetic event to trigger handleLogin
+      const syntheticEvent = { preventDefault: () => {} } as FormEvent;
+      await handleLogin(syntheticEvent);
+    } catch (error: any) {
+      console.error('Biometric login failed:', error);
+      setErrorMessage('Biometric authentication failed. Please try manual login.');
+      setIsLoading(false);
+      setIsBiometricSupported(true);
+    }
+  };
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     setIsBiometricSupported(false);
+    setIsLoading(true);
 
     if (!username || !accessCode) {
       setErrorMessage('Please enter both username and password.');
+      setIsLoading(false);
+      setIsBiometricSupported(true);
       return;
     }
 
@@ -64,6 +111,7 @@ const Login: React.FC = () => {
 
         setErrorMessage(errorMsg);
         setIsBiometricSupported(true);
+        setIsLoading(false);
         return;
       }
 
@@ -83,6 +131,7 @@ const Login: React.FC = () => {
         if (clientIds.length === 0) {
           setErrorMessage('No accounts found for this user.');
           setIsBiometricSupported(true);
+          setIsLoading(false);
           return;
         }
 
@@ -137,10 +186,16 @@ const Login: React.FC = () => {
       } else {
         setErrorMessage('Authentication failed. Invalid credentials.');
         setIsBiometricSupported(true);
+        setIsLoading(false);
         return;
       }
 
       setAuthUser(userData);
+
+      // Save credentials for biometric login (only on successful login)
+      localStorage.setItem('biometric_enabled', 'true');
+      localStorage.setItem('biometric_username', username);
+      localStorage.setItem('biometric_password', accessCode);
 
       // If multiple accounts, navigate to account selection
       // Otherwise go directly to home
@@ -149,11 +204,13 @@ const Login: React.FC = () => {
       } else {
         navigate('/home');
       }
+      // Don't set loading to false here since page will reload
       window.location.reload();
     } catch (error: any) {
       console.error('Login failed:', error);
       setErrorMessage(error.message || 'Login failed. Please check your credentials and try again.');
       setIsBiometricSupported(true);
+      setIsLoading(false);
     }
   };
 
@@ -193,6 +250,7 @@ const Login: React.FC = () => {
             onChange={(e) => setUsername(e.target.value)}
             className="text-sm w-full px-4 py-4 border-2 border-blue-300 rounded-t-md focus:outline-none focus:border-blue-500"
             placeholder="Username or A/C"
+            disabled={isLoading}
             />
           <div className="relative w-full">
             <InputText
@@ -201,12 +259,14 @@ const Login: React.FC = () => {
                 onChange={(e) => setAccessCode(e.target.value)}
                 className="text-sm w-full px-4 py-4 pr-12 border-2 border-blue-300 rounded-b-md focus:outline-none focus:border-blue-500"
                 placeholder="Password"
+                disabled={isLoading}
             />
             <Button
                 type="button"
                 icon={showPin ? 'pi pi-eye-slash' : 'pi pi-eye'}
                 className="absolute top-1/2 right-2 -translate-y-1/2 p-button-text text-blue-600"
                 onClick={toggleVisibility}
+                disabled={isLoading}
             />
             </div>
             {errorMessage && (
@@ -217,15 +277,25 @@ const Login: React.FC = () => {
         <div className="flex items-center w-full space-x-4">
           <button
             onClick={handleLogin}
-            className="py-4 flex-1 bg-[#115DA9] text-white font-bold rounded-md hover:bg-[#115DA9] transition-colors"
+            disabled={isLoading}
+            className="py-4 flex-1 bg-[#115DA9] text-white font-bold rounded-md hover:bg-[#0d4a87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            LOGIN
+            {isLoading ? (
+              <>
+                <i className="pi pi-spin pi-spinner" style={{ fontSize: '1rem' }}></i>
+                Logging in...
+              </>
+            ) : (
+              'LOGIN'
+            )}
           </button>
-          {isBiometricSupported && (
+          {isBiometricSupported && !isLoading && (
             <button
-              className="flex items-center justify-center p-3 border border-[#115DA9] rounded-md hover:bg-[#115DA9] transition-colors"
+              onClick={handleBiometricLogin}
+              className="flex items-center justify-center p-3 border border-[#115DA9] rounded-md hover:bg-[#115DA9] hover:text-white transition-colors group"
+              title="Login with biometrics"
             >
-              <FingerPrintScanIcon className="text-[#115DA9]" size={28} />
+              <FingerPrintScanIcon className="text-[#115DA9] group-hover:text-white" size={28} />
             </button>
           )}
         </div>

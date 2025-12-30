@@ -440,11 +440,11 @@ ${depositProof ? `Proof: ${depositProof.name}` : ''}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="animate-spin">⏳</span>
+                      <i className="pi pi-spin pi-spinner" style={{ fontSize: '0.875rem' }}></i>
                       Submitting...
                     </>
                   ) : (

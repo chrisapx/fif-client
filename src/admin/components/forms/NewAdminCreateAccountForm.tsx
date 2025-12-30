@@ -27,6 +27,7 @@ const NewAdminCreateAccountForm: React.FC = () => {
   const [accountTypes, setAccountTypes] = useState<any[]>([]);
 
   const [message, setMessage] = useState<IMessage | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     accName: '',
@@ -69,6 +70,8 @@ const NewAdminCreateAccountForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
 
     const headers = {
       Authorization: `Bearer ${token}`,
@@ -78,7 +81,7 @@ const NewAdminCreateAccountForm: React.FC = () => {
     try {
       const response = await axios.post(api_urls.accounts.create_bank_account, formData, { headers });
       console.log(response?.data)
-    
+
       setMessage({
         text: 'Account being set up. You may refresh later to check status.',
         type: 'success',
@@ -91,6 +94,8 @@ const NewAdminCreateAccountForm: React.FC = () => {
       const fallbackMessage =
         error?.response?.data?.message || 'Failed to create account. Try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -271,14 +276,23 @@ const NewAdminCreateAccountForm: React.FC = () => {
                   type="button"
                   onClick={handleHidePanel}
                   className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Submit Application
+                  {isSubmitting ? (
+                    <>
+                      <i className="pi pi-spin pi-spinner" style={{ fontSize: '0.875rem' }}></i>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Application'
+                  )}
                 </button>
               </div>
             </form>

@@ -88,9 +88,28 @@ const History = () => {
         );
 
         const accountsData = accountsResponse.data || {};
-        const savingsAccounts = accountsData.savingsAccounts || [];
-        const loanAccounts = accountsData.loanAccounts || [];
-        const shareAccounts = accountsData.shareAccounts || [];
+
+        // Filter out closed/withdrawn accounts
+        const savingsAccounts = (accountsData.savingsAccounts || []).filter((acc: any) => {
+          const status = acc.status?.value?.toLowerCase() || '';
+          const statusCode = acc.status?.code?.toLowerCase() || '';
+          const excludedStatuses = ['withdrawn', 'rejected', 'closed'];
+          return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+        });
+
+        const loanAccounts = (accountsData.loanAccounts || []).filter((loan: any) => {
+          const status = loan.status?.value?.toLowerCase() || '';
+          const statusCode = loan.status?.code?.toLowerCase() || '';
+          const excludedStatuses = ['withdrawn', 'rejected', 'closed', 'overpaid', 'writeoff', 'written'];
+          return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+        });
+
+        const shareAccounts = (accountsData.shareAccounts || []).filter((share: any) => {
+          const status = share.status?.value?.toLowerCase() || '';
+          const statusCode = share.status?.code?.toLowerCase() || '';
+          const excludedStatuses = ['withdrawn', 'rejected', 'closed'];
+          return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+        });
 
         // Fetch transactions for each savings account using associations
         const savingsTransactionsPromises = savingsAccounts.map(async (account: any) => {

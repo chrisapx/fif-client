@@ -20,6 +20,7 @@ const NewAdminTransactionForm: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const panelStatus = searchParams.get(searchParamsVariables.newAdminTransactionPanelOpen);
   const [message, setMessage] = useState<IMessage | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     accountId: '',
@@ -47,6 +48,8 @@ const NewAdminTransactionForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
 
     const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
 
@@ -110,6 +113,8 @@ const NewAdminTransactionForm: React.FC = () => {
         error?.response?.data?.errors?.[0]?.defaultUserMessage ||
         'Failed to submit transaction. Try again.';
       setMessage({ text: fallbackMessage, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -256,14 +261,23 @@ const NewAdminTransactionForm: React.FC = () => {
                   type="button"
                   onClick={handleHidePanel}
                   className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Submit Transaction
+                  {isSubmitting ? (
+                    <>
+                      <i className="pi pi-spin pi-spinner" style={{ fontSize: '0.875rem' }}></i>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Transaction'
+                  )}
                 </button>
               </div>
             </form>

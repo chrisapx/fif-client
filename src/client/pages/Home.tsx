@@ -92,7 +92,15 @@ const Home: React.FC = () => {
 
       // Extract savings accounts
       if (accountsData.savingsAccounts) {
-        const savingsAccounts = accountsData.savingsAccounts.map((acc: any) => ({
+        // Filter out closed, withdrawn, and rejected savings accounts
+        const activeSavingsAccounts = accountsData.savingsAccounts.filter((acc: any) => {
+          const status = acc.status?.value?.toLowerCase() || '';
+          const statusCode = acc.status?.code?.toLowerCase() || '';
+          const excludedStatuses = ['withdrawn', 'rejected', 'closed'];
+          return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+        });
+
+        const savingsAccounts = activeSavingsAccounts.map((acc: any) => ({
           accountId: acc.id,
           accNumber: acc.accountNo,
           accName: acc.productName || acc.shortProductName,
@@ -113,7 +121,15 @@ const Home: React.FC = () => {
 
       // Extract loan accounts
       if (accountsData.loanAccounts) {
-        const loanAccounts = accountsData.loanAccounts.map((loan: any) => {
+        // Filter out withdrawn, rejected, and closed loans
+        const activeLoanAccounts = accountsData.loanAccounts.filter((loan: any) => {
+          const status = loan.status?.value?.toLowerCase() || '';
+          const statusCode = loan.status?.code?.toLowerCase() || '';
+          const excludedStatuses = ['withdrawn', 'rejected', 'closed', 'overpaid', 'writeoff', 'written'];
+          return !excludedStatuses.some(excluded => status.includes(excluded) || statusCode.includes(excluded));
+        });
+
+        const loanAccounts = activeLoanAccounts.map((loan: any) => {
           const disbursementDate = convertArrayToDate(loan.timeline?.actualDisbursementDate);
           const maturityDate = convertArrayToDate(loan.timeline?.actualMaturityDate || loan.timeline?.expectedMaturityDate);
 
