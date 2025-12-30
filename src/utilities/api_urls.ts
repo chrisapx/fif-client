@@ -1,7 +1,7 @@
-import { getAuthUser } from "./AuthCookieManager";
+// import { getAuthUser } from "./AuthCookieManager";
 
 const FINERACT_API_URL = import.meta.env.VITE_FINERACT_API_URL;
-const clientId = getAuthUser()?.userId ?? '';
+// const clientId = getAuthUser()?.userId ?? '';
 
 /**
  * Fineract API endpoints mapping
