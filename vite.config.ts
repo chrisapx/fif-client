@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       injectRegister: 'auto',
-      includeAssets: ['logos/fif 3.png', 'logos/fif 2.png', 'logos/Splach Logo.png'],
+      includeAssets: ['logos/icons/apple-icon-180.png', 'logos/icons/manifest-icon-192.maskable.png', 'logos/icons/manifest-icon-512.maskable.png'],
       manifest: {
         id: '/',
         name: 'FIFund',
@@ -22,26 +22,26 @@ export default defineConfig({
         start_url: '/?source=pwa',
         icons: [
           {
-            src: '/logos/fif 3.png',
-            sizes: '64x64 32x32 24x24 16x16',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: '/logos/fif 3.png',
+            src: '/logos/icons/manifest-icon-192.maskable.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/logos/fif 3.png',
+            src: '/logos/icons/manifest-icon-512.maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/logos/fif 3.png',
+            src: '/logos/icons/manifest-icon-192.maskable.png',
             sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/logos/icons/manifest-icon-512.maskable.png',
+            sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
           }

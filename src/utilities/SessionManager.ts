@@ -66,7 +66,7 @@ class SessionManager {
       clearTimeout(this.sessionTimer);
     }
 
-    this.sessionTimer = setTimeout(() => {
+    this.sessionTimer = window.setTimeout(() => {
       this.destroySession('Session expired after 5 minutes');
     }, this.sessionDuration);
   }
@@ -79,7 +79,7 @@ class SessionManager {
       clearTimeout(this.inactivityTimer);
     }
 
-    this.inactivityTimer = setTimeout(() => {
+    this.inactivityTimer = window.setTimeout(() => {
       this.destroySession('Session expired due to 30 seconds of inactivity');
     }, this.inactivityTimeout);
   }
