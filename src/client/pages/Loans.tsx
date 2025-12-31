@@ -144,8 +144,8 @@ const Loans: React.FC = () => {
     <div className="flex flex-col h-screen bg-white relative overflow-hidden">
       <Header />
       {isLoading && (
-        <span className="relative block w-full h-1.5 bg-blue-100 overflow-hidden rounded-full">
-          <span className="absolute top-0 left-0 h-1.5 w-48 bg-blue-600 animate-loaderSlide rounded-full"></span>
+        <span className="relative block w-full h-1.5 bg-teal-100 overflow-hidden rounded-full">
+          <span className="absolute top-0 left-0 h-1.5 w-48 bg-[#1a8ca5] animate-loaderSlide rounded-full"></span>
         </span>
       )}
       <section className='overflow-y-auto mt-12 mb-12'>

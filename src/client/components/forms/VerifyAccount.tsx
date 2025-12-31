@@ -80,7 +80,7 @@ const PhoneVerificationPanel: React.FC = () => {
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="w-full bg-[#115DA9] text-white py-2 rounded hover:bg-blue-700 text-sm disabled:opacity-50"
+            className="w-full bg-[#1a8ca5] text-white py-2 rounded hover:bg-[#044f5f] text-sm disabled:opacity-50"
           >
             Verify Phone
           </button>

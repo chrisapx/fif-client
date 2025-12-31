@@ -62,7 +62,7 @@ const SelectAccount: React.FC = () => {
           preserveAspectRatio="none"
         >
           <path
-            fill="#115DA9"
+            fill="#1a8ca5"
             fillOpacity="0.9"
             d="M0,224L60,213.3C120,203,240,181,360,181.3C480,181,600,203,720,213.3C840,224,960,224,1080,213.3C1200,203,1320,181,1380,170.7L1440,160L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
           />
@@ -89,15 +89,15 @@ const SelectAccount: React.FC = () => {
             className={`
               w-full p-5 border-2 rounded-lg cursor-pointer transition-all
               ${selectedIndex === index
-                ? 'border-[#115DA9] bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-blue-300'
+                ? 'border-[#1a8ca5] bg-teal-50'
+                : 'border-gray-200 bg-white hover:border-teal-300'
               }
             `}
           >
             <div className="flex items-center gap-4">
               <div className={`
                 p-3 rounded-full
-                ${selectedIndex === index ? 'bg-[#115DA9]' : 'bg-gray-200'}
+                ${selectedIndex === index ? 'bg-[#1a8ca5]' : 'bg-gray-200'}
               `}>
                 <UserCircle02Icon
                   size={28}
@@ -116,7 +116,7 @@ const SelectAccount: React.FC = () => {
                 </p>
               </div>
               {selectedIndex === index && (
-                <div className="w-6 h-6 rounded-full bg-[#115DA9] flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-[#1a8ca5] flex items-center justify-center">
                   <i className="pi pi-check text-white text-xs"></i>
                 </div>
               )}
@@ -130,7 +130,7 @@ const SelectAccount: React.FC = () => {
           className={`
             w-full py-4 mt-6 rounded-md font-bold text-white transition-colors
             ${selectedIndex !== null
-              ? 'bg-[#115DA9] hover:bg-blue-700'
+              ? 'bg-[#1a8ca5] hover:bg-[#044f5f]'
               : 'bg-gray-300 cursor-not-allowed'
             }
           `}

@@ -28,7 +28,7 @@ const ViewTransactions = () => {
       case 'debit':
         return { icon: <BsArrowUpCircle className="text-red-500" size={20} />, color: 'text-red-600' };
       case 'transfer':
-        return { icon: <FiRefreshCcw className="text-blue-500" size={20} />, color: 'text-blue-600' };
+        return { icon: <FiRefreshCcw className="text-[#1a8ca5]" size={20} />, color: 'text-[#1a8ca5]' };
       default:
         return { icon: <FiRefreshCcw className="text-gray-400" size={20} />, color: 'text-gray-600' };
     }
@@ -167,7 +167,7 @@ const ViewTransactions = () => {
             key={i}
             onClick={() => setStatusFilter(tb.value)}
             className={`px-3 py-1 text-sm rounded-md ${
-              statusFilter === tb.value ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
+              statusFilter === tb.value ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
             {tb.name}
@@ -176,7 +176,7 @@ const ViewTransactions = () => {
       </div>
 
       {/* New Transaction Button */}
-      <button onClick={handleCreateNew} className="m-3 p-2 flex items-center gap-2 bg-blue-500 text-white rounded-md">
+      <button onClick={handleCreateNew} className="m-3 p-2 flex items-center gap-2 bg-teal-500 text-white rounded-md">
         <PlusSignIcon className="text-sm" />
         <p>New Transaction</p>
       </button>

@@ -86,8 +86,8 @@ const SavingsProducts: React.FC = () => {
     <div className="flex flex-col h-screen bg-white relative overflow-hidden">
       <Header />
       {isLoading && (
-        <span className="relative block w-full h-1.5 bg-blue-100 overflow-hidden rounded-full">
-          <span className="absolute top-0 left-0 h-1.5 w-48 bg-blue-600 animate-loaderSlide rounded-full"></span>
+        <span className="relative block w-full h-1.5 bg-teal-100 overflow-hidden rounded-full">
+          <span className="absolute top-0 left-0 h-1.5 w-48 bg-[#1a8ca5] animate-loaderSlide rounded-full"></span>
         </span>
       )}
 
@@ -104,7 +104,7 @@ const SavingsProducts: React.FC = () => {
           </p>
           <button
             onClick={handleApplyForSavings}
-            className="flex items-center gap-1 px-3 py-1.5 bg-white text-blue-900 rounded-full text-xs font-semibold hover:bg-blue-50 transition"
+            className="flex items-center gap-1 px-3 py-1.5 bg-white text-teal-900 rounded-full text-xs font-semibold hover:bg-teal-50 transition"
           >
             <PlusSignIcon size={14} />
             Apply
@@ -125,8 +125,8 @@ const SavingsProducts: React.FC = () => {
                 className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-3 bg-blue-50 rounded-full">
-                    <MoneySavingJarIcon size={24} className="text-blue-600" />
+                  <div className="p-3 bg-teal-50 rounded-full">
+                    <MoneySavingJarIcon size={24} className="text-[#1a8ca5]" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-gray-800">
@@ -147,9 +147,9 @@ const SavingsProducts: React.FC = () => {
                       </div>
 
                       {product.currency && (
-                        <div className="bg-blue-50 rounded px-3 py-2">
+                        <div className="bg-teal-50 rounded px-3 py-2">
                           <p className="text-[10px] text-gray-500">Currency</p>
-                          <p className="text-sm font-semibold text-blue-700">
+                          <p className="text-sm font-semibold text-[#157582]">
                             {product.currency.displaySymbol || product.currency.code}
                           </p>
                         </div>
@@ -166,7 +166,7 @@ const SavingsProducts: React.FC = () => {
 
                     <button
                       onClick={() => handleApplyClick(product.id)}
-                      className="mt-3 w-full py-2 px-4 bg-[#115DA9] text-white text-xs font-semibold rounded hover:bg-blue-700 transition"
+                      className="mt-3 w-full py-2 px-4 bg-[#1a8ca5] text-white text-xs font-semibold rounded hover:bg-[#044f5f] transition"
                     >
                       Apply for this Product
                     </button>

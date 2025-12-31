@@ -77,7 +77,7 @@ export default function CreateUser() {
 
         {/* Submit */}
         <div className="col-span-2">
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button type="submit" className="bg-[#1a8ca5] text-white px-4 py-2 rounded hover:bg-[#044f5f]">
             Create User
           </button>
         </div>

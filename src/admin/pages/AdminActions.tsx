@@ -50,7 +50,7 @@ const AdminActions: React.FC = () => {
               onClick={() => navigate(`/${option.url}`)}
             >
               <div className="flex gap-4 items-center">
-                <div className="text-blue-600 bg-blue-100 p-2 rounded-full">{option.icon}</div>
+                <div className="text-[#1a8ca5] bg-teal-100 p-2 rounded-full">{option.icon}</div>
                 <div>
                   <p className="text-sm font-semibold text-gray-700">{option.name}</p>
                   <p className="text-xs text-gray-500">{option.description}</p>

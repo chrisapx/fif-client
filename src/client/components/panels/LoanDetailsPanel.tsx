@@ -137,7 +137,7 @@ const LoanDetailsPanel = () => {
         className='w-full'
         content={({ hide }) => (
           <section className='overflow-y-auto'>
-            <div className='fixed w-full top-0 right-0 left-0 flex justify-between items-center px-2 py-3 bg-blue-500 text-white'>
+            <div className='fixed w-full top-0 right-0 left-0 flex justify-between items-center px-2 py-3 bg-teal-500 text-white'>
               <i className='pi pi-times' onClick={hide} />
               <p>Loan Details</p>
               <Logout05Icon />
@@ -244,7 +244,7 @@ const LoanDetailsPanel = () => {
                   <div className='px-2 py-3 space-y-2'>
                     <button
                       onClick={handleEditLoanApplication}
-                      className='w-full px-4 py-3 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center gap-2'
+                      className='w-full px-4 py-3 text-sm bg-[#1a8ca5] text-white rounded hover:bg-[#044f5f] flex items-center justify-center gap-2'
                     >
                       <i className='pi pi-pencil' />
                       Edit Application
@@ -263,7 +263,7 @@ const LoanDetailsPanel = () => {
               {/* Recent Transactions */}
               {recentTransactions.length > 0 && (
                 <div className='mt-4'>
-                  <div className='px-2 py-3 bg-blue-600 text-white'>
+                  <div className='px-2 py-3 bg-[#1a8ca5] text-white'>
                     <p className='font-semibold'>Recent Transactions (Last 5)</p>
                   </div>
                   {recentTransactions.map((trx: any, index: number) => (
@@ -277,7 +277,7 @@ const LoanDetailsPanel = () => {
                         </p>
                       </div>
                       <div className='text-right'>
-                        <p className={`text-sm font-semibold ${trx.type?.disbursement ? 'text-blue-600' : 'text-green-600'}`}>
+                        <p className={`text-sm font-semibold ${trx.type?.disbursement ? 'text-[#1a8ca5]' : 'text-green-600'}`}>
                           {loanDetails?.currency?.displaySymbol || 'UGX'} {(trx.amount || 0).toLocaleString()}
                         </p>
                         {trx.reversed && (
@@ -292,7 +292,7 @@ const LoanDetailsPanel = () => {
               {/* Repayment Schedule */}
               {repaymentSchedule.length > 0 && (
                 <div className='mt-6'>
-                  <div className='px-2 py-3 bg-blue-600 text-white'>
+                  <div className='px-2 py-3 bg-[#1a8ca5] text-white'>
                     <p className='font-semibold'>Repayment Schedule</p>
                   </div>
                   <div className='overflow-x-auto'>
@@ -339,7 +339,7 @@ const LoanDetailsPanel = () => {
               )}
             </section>
             <div onClick={handleOpenLoanRequestForm} className='border-t border-gray-200 px-2 py-3 fixed bottom-0 left-0 right-0 w-full pb-4 bg-white'>
-              <button className='text-[#115DA9] border-2 border-[#115DA9] px-4 py-2 rounded w-full'>+ Request New Loan</button>
+              <button className='text-[#1a8ca5] border-2 border-[#1a8ca5] px-4 py-2 rounded w-full'>+ Request New Loan</button>
             </div>
           </section>
         )}

@@ -24,7 +24,7 @@ const History = () => {
       case 'repayment':
         return { icon: <FiRefreshCcw className="text-green-500" size={20} />, color: 'text-green-600' };
       case 'disbursement':
-        return { icon: <FiRefreshCcw className="text-blue-500" size={20} />, color: 'text-blue-600' };
+        return { icon: <FiRefreshCcw className="text-[#1a8ca5]" size={20} />, color: 'text-[#1a8ca5]' };
       case 'purchase':
         return { icon: <BsArrowDownCircle className="text-purple-500" size={20} />, color: 'text-purple-600' };
       case 'redeem':

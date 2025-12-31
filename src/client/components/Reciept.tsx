@@ -83,7 +83,7 @@ const Receipt: React.FC<TicketProps> = ({
       </div>
       <button
         onClick={downloadPDF}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="mt-4 px-4 py-2 bg-[#1a8ca5] text-white rounded hover:bg-[#044f5f]"
       >
         Download Ticket
       </button>

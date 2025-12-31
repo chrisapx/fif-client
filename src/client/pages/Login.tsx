@@ -445,7 +445,7 @@ const Login: React.FC = () => {
           preserveAspectRatio="none"
         >
           <path
-            fill="#115DA9"
+            fill="#1a8ca5"
             fillOpacity="0.9"
             d="M0,224L60,213.3C120,203,240,181,360,181.3C480,181,600,203,720,213.3C840,224,960,224,1080,213.3C1200,203,1320,181,1380,170.7L1440,160L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
           />
@@ -469,7 +469,7 @@ const Login: React.FC = () => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="text-sm w-full px-4 py-4 border-2 border-blue-300 rounded-t-md focus:outline-none focus:border-blue-500"
+            className="text-sm w-full px-4 py-4 border-2 border-teal-300 rounded-t-md focus:outline-none focus:border-[#1a8ca5]"
             placeholder="Username or A/C"
             disabled={isLoading}
             />
@@ -478,14 +478,14 @@ const Login: React.FC = () => {
                 type={showPin ? 'text' : 'password'}
                 value={accessCode}
                 onChange={(e) => setAccessCode(e.target.value)}
-                className="text-sm w-full px-4 py-4 pr-12 border-2 border-blue-300 rounded-b-md focus:outline-none focus:border-blue-500"
+                className="text-sm w-full px-4 py-4 pr-12 border-2 border-teal-300 rounded-b-md focus:outline-none focus:border-[#1a8ca5]"
                 placeholder="Password"
                 disabled={isLoading}
             />
             <Button
                 type="button"
                 icon={showPin ? 'pi pi-eye-slash' : 'pi pi-eye'}
-                className="absolute top-1/2 right-2 -translate-y-1/2 p-button-text text-blue-600"
+                className="absolute top-1/2 right-2 -translate-y-1/2 p-button-text text-[#1a8ca5]"
                 onClick={toggleVisibility}
                 disabled={isLoading}
             />
@@ -499,7 +499,7 @@ const Login: React.FC = () => {
           <button
             onClick={handleLogin}
             disabled={isLoading}
-            className="py-4 flex-1 bg-[#115DA9] text-white font-bold rounded-md hover:bg-[#0d4a87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="py-4 flex-1 bg-[#1a8ca5] text-white font-bold rounded-md hover:bg-[#157582] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>
@@ -513,11 +513,11 @@ const Login: React.FC = () => {
           {isBiometricSupported && !isLoading && (
             <button
               onClick={handleBiometricLogin}
-              className="flex items-center justify-center p-3 border border-[#115DA9] rounded-md hover:bg-[#115DA9] hover:text-white transition-colors group"
+              className="flex items-center justify-center p-3 border border-[#1a8ca5] rounded-md hover:bg-[#1a8ca5] hover:text-white transition-colors group"
               title="Login with fingerprint or Face ID"
               aria-label="Login with biometric authentication"
             >
-              <FingerPrintScanIcon className="text-[#115DA9] group-hover:text-white" size={28} />
+              <FingerPrintScanIcon className="text-[#1a8ca5] group-hover:text-white" size={28} />
             </button>
           )}
         </div>
@@ -525,11 +525,11 @@ const Login: React.FC = () => {
         <div className="grid grid-cols-2 gap-1 w-full">
           <button
             onClick={handleCreateAccount}
-            className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#115DA9] text-xs flex justify-between items-center"
+            className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#1a8ca5] text-xs flex justify-between items-center"
           >
-            Create an account <BankIcon size={16} className="text-[#115DA9]" />
+            Create an account <BankIcon size={16} className="text-[#1a8ca5]" />
           </button>
-          <button className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#115DA9] text-xs flex justify-center items-center opacity-50">
+          <button className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#1a8ca5] text-xs flex justify-center items-center opacity-50">
             ?
           </button>
         </div>
@@ -544,8 +544,8 @@ const Login: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <FingerPrintScanIcon className="text-[#115DA9]" size={32} />
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                <FingerPrintScanIcon className="text-[#1a8ca5]" size={32} />
               </div>
 
               <h2 className="text-xl font-bold text-gray-800 mb-2">
@@ -560,7 +560,7 @@ const Login: React.FC = () => {
                 <button
                   onClick={enableBiometricAuth}
                   disabled={isLoading}
-                  className="w-full py-3 bg-[#115DA9] text-white font-semibold rounded-md hover:bg-[#0d4a87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#1a8ca5] text-white font-semibold rounded-md hover:bg-[#157582] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>

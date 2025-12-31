@@ -109,6 +109,51 @@ const api_urls = {
     reports: {
         client_summary: (clientId: string) => `${FINERACT_API_URL}/runreports/Client%20Summary?R_clientId=${clientId}`,
         transaction_report: `${FINERACT_API_URL}/runreports/Transaction%20Report`
+    },
+
+    // Account Transfers (Self-service endpoints)
+    transfers: {
+        // Get template for creating transfers (includes available accounts)
+        template: `${FINERACT_API_URL}/self/accounttransfers/template`,
+        // Get template for third-party transfers
+        tpt_template: `${FINERACT_API_URL}/self/accounttransfers/template?type=tpt`,
+        // Create account transfer (between own accounts)
+        create_transfer: `${FINERACT_API_URL}/self/accounttransfers`,
+        // Create third-party transfer
+        create_tpt_transfer: `${FINERACT_API_URL}/self/accounttransfers?type=tpt`,
+        // Get transfer history
+        get_transfers: `${FINERACT_API_URL}/self/accounttransfers`,
+        // Get specific transfer
+        get_transfer: (transferId: string) => `${FINERACT_API_URL}/self/accounttransfers/${transferId}`,
+        // Loan refund template
+        refund_template: (loanId: string, accountType: number = 1) =>
+            `${FINERACT_API_URL}/accounttransfers/templateRefundByTransfer?fromAccountId=${loanId}&fromAccountType=${accountType}`,
+        // Refund loan by transfer
+        refund_loan: `${FINERACT_API_URL}/accounttransfers/refundByTransfer`,
+    },
+
+    // Beneficiaries (Third-Party Transfer)
+    beneficiaries: {
+        // Get TPT beneficiaries template
+        template: `${FINERACT_API_URL}/self/beneficiaries/tpt/template`,
+        // List all TPT beneficiaries
+        list: `${FINERACT_API_URL}/self/beneficiaries/tpt`,
+        // Add new beneficiary
+        create: `${FINERACT_API_URL}/self/beneficiaries/tpt`,
+        // Update beneficiary
+        update: (beneficiaryId: string) => `${FINERACT_API_URL}/self/beneficiaries/tpt/${beneficiaryId}`,
+        // Delete beneficiary
+        delete: (beneficiaryId: string) => `${FINERACT_API_URL}/self/beneficiaries/tpt/${beneficiaryId}`,
+    },
+
+    // Standing Instructions (Recurring Transfers)
+    standingInstructions: {
+        template: `${FINERACT_API_URL}/standinginstructions/template`,
+        create: `${FINERACT_API_URL}/standinginstructions`,
+        list: `${FINERACT_API_URL}/standinginstructions`,
+        get: (instructionId: string) => `${FINERACT_API_URL}/standinginstructions/${instructionId}`,
+        update: (instructionId: string) => `${FINERACT_API_URL}/standinginstructions/${instructionId}`,
+        delete: (instructionId: string) => `${FINERACT_API_URL}/standinginstructions/${instructionId}`,
     }
 }
 

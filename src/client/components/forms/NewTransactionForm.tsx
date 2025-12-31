@@ -258,7 +258,7 @@ ${depositProof ? `Proof: ${depositProof.name}` : ''}
         className="w-full"
         content={({ hide }) => (
           <section className="overflow-auto">
-            <div className="sticky top-0 bg-blue-600 text-white flex justify-between items-center px-4 py-3 z-10">
+            <div className="sticky top-0 bg-[#1a8ca5] text-white flex justify-between items-center px-4 py-3 z-10">
               <i className="pi pi-times text-lg" onClick={hide}></i>
               <p className="text-sm font-semibold">New Transaction</p>
               <Logout05Icon size={18} onClick={handleLogout} />
@@ -420,7 +420,7 @@ ${depositProof ? `Proof: ${depositProof.name}` : ''}
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-xs text-blue-700">
+              <div className="bg-teal-50 border border-teal-200 rounded p-3 mb-4 text-xs text-[#157582]">
                 <p className="font-semibold mb-1">ℹ️ Self-Reported Transaction</p>
                 <p>
                   This transaction will be submitted for admin verification.
@@ -440,7 +440,7 @@ ${depositProof ? `Proof: ${depositProof.name}` : ''}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="px-6 py-2 text-sm bg-[#1a8ca5] text-white rounded hover:bg-[#157582] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>

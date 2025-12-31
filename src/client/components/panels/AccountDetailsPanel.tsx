@@ -69,7 +69,7 @@ const AccountDetailsPanel = () => {
         className='w-full'
         content={({ hide }) => (
             <section className='pb-16'>
-              <div className='flex justify-between items-center px-2 py-3 bg-blue-500 text-white sticky top-0 z-10'>
+              <div className='flex justify-between items-center px-2 py-3 bg-teal-500 text-white sticky top-0 z-10'>
                 <i className='pi pi-times' onClick={hide}/>
                 <p>Account Details</p>
                 <Logout05Icon/>
@@ -147,7 +147,7 @@ const AccountDetailsPanel = () => {
               {/* Recent Transactions */}
               {recentTransactions.length > 0 && (
                 <div className='mt-4'>
-                  <div className='px-2 py-3 bg-blue-600 text-white'>
+                  <div className='px-2 py-3 bg-[#1a8ca5] text-white'>
                     <p className='font-semibold'>Recent Transactions (Last 5)</p>
                   </div>
                   {recentTransactions.map((trx: any, index: number) => (

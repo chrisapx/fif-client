@@ -6,6 +6,9 @@ export default {
     ],
     theme: {
       extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
         animation: {
         loaderSlide: 'loaderSlide 2s linear infinite',
       },
@@ -22,12 +25,12 @@ export default {
         },
       },
         colors: {
-          primary: "#115DA9", // 👈 your custom color
+          primary: "#1a8ca5", // Teal primary color
           // You can also add shades
           brand: {
-            light: "#6BB9F0",
-            DEFAULT: "#115DA9",
-            dark: "#0B3C6E",
+            light: "#5ab3ca",
+            DEFAULT: "#1a8ca5",
+            dark: "#044f5f",
           },
         },
       },

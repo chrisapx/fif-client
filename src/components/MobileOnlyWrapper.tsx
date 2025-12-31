@@ -28,7 +28,7 @@ const MobileOnlyWrapper: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <svg
-              className="mx-auto h-24 w-24 text-blue-600"
+              className="mx-auto h-24 w-24 text-[#1a8ca5]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -48,11 +48,11 @@ const MobileOnlyWrapper: React.FC<{ children: React.ReactNode }> = ({ children }
             This application is designed exclusively for mobile devices.
             Please access it from your smartphone or tablet for the best experience.
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
+          <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-teal-800">
               <strong>How to access:</strong>
             </p>
-            <ul className="text-sm text-blue-700 mt-2 text-left list-disc list-inside">
+            <ul className="text-sm text-[#157582] mt-2 text-left list-disc list-inside">
               <li>Open this URL on your mobile device</li>
               <li>Or resize your browser to mobile width (≤768px)</li>
             </ul>

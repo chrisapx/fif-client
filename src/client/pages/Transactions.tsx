@@ -21,7 +21,7 @@ const Transactions = () => {
       case 'debit':
         return { icon: <BsArrowUpCircle className="text-red-500" size={20} />, color: 'text-red-600' };
       case 'transfer':
-        return { icon: <FiRefreshCcw className="text-blue-500" size={20} />, color: 'text-blue-600' };
+        return { icon: <FiRefreshCcw className="text-[#1a8ca5]" size={20} />, color: 'text-[#1a8ca5]' };
       default:
         return { icon: <FiRefreshCcw className="text-gray-400" size={20} />, color: 'text-gray-600' };
     }

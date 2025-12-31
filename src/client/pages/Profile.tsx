@@ -84,7 +84,7 @@ const Profile = () => {
         {/* Profile Header */}
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 mb-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold">
+            <div className="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center text-white text-xl font-bold">
               {(clientDetails?.displayName || user.firstName)?.charAt(0) || 'U'}
             </div>
             <div>
@@ -103,9 +103,9 @@ const Profile = () => {
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 mb-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Account Summary</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-blue-50 rounded-lg p-3">
+            <div className="bg-teal-50 rounded-lg p-3">
               <p className="text-xs text-gray-600">Savings</p>
-              <p className="text-lg font-bold text-blue-600">{accounts?.savingsAccounts?.length || 0}</p>
+              <p className="text-lg font-bold text-[#1a8ca5]">{accounts?.savingsAccounts?.length || 0}</p>
             </div>
             <div className="bg-green-50 rounded-lg p-3">
               <p className="text-xs text-gray-600">Loans</p>
@@ -173,11 +173,11 @@ const Profile = () => {
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Linked Accounts</h3>
             <p className="text-xs text-gray-600 mb-3">You have access to {availableAccounts.length} client accounts</p>
             {availableAccounts.map((acc: any, index: number) => (
-              <div key={index} className={`p-3 mb-2 rounded-lg ${user.selectedAccountIndex === index ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
+              <div key={index} className={`p-3 mb-2 rounded-lg ${user.selectedAccountIndex === index ? 'bg-teal-50 border border-teal-200' : 'bg-gray-50'}`}>
                 <p className="text-sm font-medium">{acc.displayName}</p>
                 <p className="text-xs text-gray-500">{acc.accountNo}</p>
                 {user.selectedAccountIndex === index && (
-                  <span className="text-xs text-blue-600 font-semibold">Currently Active</span>
+                  <span className="text-xs text-[#1a8ca5] font-semibold">Currently Active</span>
                 )}
               </div>
             ))}

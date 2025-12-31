@@ -260,7 +260,7 @@ const LoanRequestForm = () => {
         className='w-full'
         content={({ hide }) => (
           <section className='overflow-auto'>
-            <div className='sticky w-full top-0 flex justify-between items-center px-2 py-3 bg-blue-500 text-white'>
+            <div className='sticky w-full top-0 flex justify-between items-center px-2 py-3 bg-teal-500 text-white'>
               <i className='pi pi-times' onClick={hide} />
               <p>{isEditMode ? 'Edit Loan Application' : 'Loan Request Form'}</p>
               <Logout05Icon />
@@ -299,19 +299,19 @@ const LoanRequestForm = () => {
                   ))}
                 </select>
                 {selectedProduct && (
-                  <div className='mt-3 p-3 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-xs'>
-                    <p className='font-bold text-blue-900 mb-2 text-sm'>{selectedProduct.name}</p>
+                  <div className='mt-3 p-3 bg-gradient-to-br from-blue-50 to-blue-100 border border-teal-200 rounded-lg text-xs'>
+                    <p className='font-bold text-teal-900 mb-2 text-sm'>{selectedProduct.name}</p>
 
                     {/* Currency */}
-                    <div className='mb-3 pb-2 border-b border-blue-200'>
+                    <div className='mb-3 pb-2 border-b border-teal-200'>
                       <p className='text-gray-600 mb-1'>Currency</p>
-                      <p className='font-semibold text-blue-800'>
+                      <p className='font-semibold text-teal-800'>
                         {selectedProduct.currency?.displayLabel || selectedProduct.currency?.name || 'N/A'}
                       </p>
                     </div>
 
                     {/* Principal Amount Limits */}
-                    <div className='mb-3 pb-2 border-b border-blue-200'>
+                    <div className='mb-3 pb-2 border-b border-teal-200'>
                       <p className='text-gray-600 mb-1'>Principal Amount Range</p>
                       <div className='grid grid-cols-3 gap-2'>
                         <div>
@@ -322,7 +322,7 @@ const LoanRequestForm = () => {
                         </div>
                         <div>
                           <p className='text-[10px] text-gray-500'>Default</p>
-                          <p className='font-semibold text-blue-700'>
+                          <p className='font-semibold text-[#157582]'>
                             {selectedProduct.currency?.displaySymbol} {selectedProduct.principal?.toLocaleString() || 'N/A'}
                           </p>
                         </div>
@@ -336,7 +336,7 @@ const LoanRequestForm = () => {
                     </div>
 
                     {/* Repayment Terms */}
-                    <div className='mb-3 pb-2 border-b border-blue-200'>
+                    <div className='mb-3 pb-2 border-b border-teal-200'>
                       <p className='text-gray-600 mb-1'>Number of Repayments ({selectedProduct.repaymentFrequencyType?.value || 'Months'})</p>
                       <div className='grid grid-cols-3 gap-2'>
                         <div>
@@ -345,7 +345,7 @@ const LoanRequestForm = () => {
                         </div>
                         <div>
                           <p className='text-[10px] text-gray-500'>Default</p>
-                          <p className='font-semibold text-blue-700'>{selectedProduct.numberOfRepayments || 'N/A'}</p>
+                          <p className='font-semibold text-[#157582]'>{selectedProduct.numberOfRepayments || 'N/A'}</p>
                         </div>
                         <div>
                           <p className='text-[10px] text-gray-500'>Maximum</p>
@@ -355,7 +355,7 @@ const LoanRequestForm = () => {
                     </div>
 
                     {/* Interest Rates */}
-                    <div className='mb-3 pb-2 border-b border-blue-200'>
+                    <div className='mb-3 pb-2 border-b border-teal-200'>
                       <p className='text-gray-600 mb-1'>Interest Rates</p>
                       <div className='space-y-1'>
                         <div className='flex justify-between items-center'>
@@ -375,18 +375,18 @@ const LoanRequestForm = () => {
                     </div>
 
                     {/* Repayment Details */}
-                    <div className='mb-3 pb-2 border-b border-blue-200'>
+                    <div className='mb-3 pb-2 border-b border-teal-200'>
                       <p className='text-gray-600 mb-1'>Repayment Details</p>
                       <div className='space-y-1'>
                         <div className='flex justify-between items-center'>
                           <span className='text-gray-600'>Frequency</span>
-                          <span className='font-semibold text-blue-700'>
+                          <span className='font-semibold text-[#157582]'>
                             Every {selectedProduct.repaymentEvery} {selectedProduct.repaymentFrequencyType?.value || 'Month(s)'}
                           </span>
                         </div>
                         <div className='flex justify-between items-center'>
                           <span className='text-gray-600'>Amortization</span>
-                          <span className='font-semibold text-blue-700'>{selectedProduct.amortizationType?.value || 'N/A'}</span>
+                          <span className='font-semibold text-[#157582]'>{selectedProduct.amortizationType?.value || 'N/A'}</span>
                         </div>
                       </div>
                     </div>
@@ -397,18 +397,18 @@ const LoanRequestForm = () => {
                       <div className='space-y-1'>
                         <div className='flex justify-between items-center'>
                           <span className='text-gray-600'>Type</span>
-                          <span className='font-semibold text-blue-700'>{selectedProduct.interestType?.value || 'N/A'}</span>
+                          <span className='font-semibold text-[#157582]'>{selectedProduct.interestType?.value || 'N/A'}</span>
                         </div>
                         <div className='flex justify-between items-center'>
                           <span className='text-gray-600'>Period</span>
-                          <span className='font-semibold text-blue-700 text-[10px]'>{selectedProduct.interestCalculationPeriodType?.value || 'N/A'}</span>
+                          <span className='font-semibold text-[#157582] text-[10px]'>{selectedProduct.interestCalculationPeriodType?.value || 'N/A'}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Status Badge */}
                     {selectedProduct.status && (
-                      <div className='mt-3 pt-2 border-t border-blue-200'>
+                      <div className='mt-3 pt-2 border-t border-teal-200'>
                         <span className='inline-block px-2 py-1 bg-green-100 text-green-800 rounded-full text-[10px] font-semibold'>
                           ✓ Active Product
                         </span>
@@ -568,7 +568,7 @@ const LoanRequestForm = () => {
                 <button
                   type='submit'
                   disabled={isSubmitting}
-                  className='px-6 py-3 text-sm bg-[#115DA9] text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+                  className='px-6 py-3 text-sm bg-[#1a8ca5] text-white rounded hover:bg-[#157582] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
                 >
                   {isSubmitting ? (
                     <>

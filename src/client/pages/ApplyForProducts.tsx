@@ -64,7 +64,7 @@ const ApplyForProducts: React.FC = () => {
                 onClick={() => handleApplyClick(product.route)}
               >
                 <div className="flex gap-4 items-center">
-                  <div className="text-blue-600 bg-blue-100 p-2 rounded-full">
+                  <div className="text-[#1a8ca5] bg-teal-100 p-2 rounded-full">
                     {product.icon}
                   </div>
                   <div>

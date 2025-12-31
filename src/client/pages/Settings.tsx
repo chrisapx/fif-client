@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
-import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 import BottomNavigationTabs from "../components/BottomNavigationTabs";
 import { getAuthUser } from "../../utilities/AuthCookieManager";
-import { FingerPrintScanIcon, CheckmarkCircle02Icon, Cancel01Icon } from "hugeicons-react";
+import { useToast } from "../../contexts/ToastContext";
+import {
+  FingerPrintScanIcon,
+  ArrowLeft01Icon,
+  Logout05Icon,
+  LockPasswordIcon,
+  UserCircle02Icon,
+  Notification03Icon,
+  Globe02Icon,
+  Moon02Icon,
+  InformationCircleIcon,
+  FileValidationIcon
+} from "hugeicons-react";
 
 // Helper functions from Login.tsx
 const stringToArrayBuffer = (str: string): ArrayBuffer => {
@@ -20,11 +32,12 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 };
 
 const Settings = () => {
+  const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const user = getAuthUser();
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     // Check if WebAuthn is supported
@@ -38,19 +51,10 @@ const Settings = () => {
 
   const enableBiometric = async () => {
     setIsProcessing(true);
-    setMessage(null);
 
     try {
       if (!user?.username) {
-        setMessage({ text: 'User information not found. Please login again.', type: 'error' });
-        setIsProcessing(false);
-        return;
-      }
-
-      // Prompt for password for security
-      const password = window.prompt('Enter your password to enable biometric login:');
-      if (!password) {
-        setMessage({ text: 'Password is required to enable biometric login.', type: 'error' });
+        showError('User information not found. Please login again.');
         setIsProcessing(false);
         return;
       }
@@ -88,21 +92,25 @@ const Settings = () => {
 
       if (credential) {
         const credentialId = arrayBufferToBase64(credential.rawId);
-        const encryptedPassword = btoa(password);
+        // Get stored password from current session
+        const storedPassword = localStorage.getItem('biometric_password') || '';
 
         localStorage.setItem('biometric_credentialId', credentialId);
         localStorage.setItem('biometric_username', username);
-        localStorage.setItem('biometric_password', encryptedPassword);
+        if (!storedPassword) {
+          // If no password stored, store a placeholder
+          localStorage.setItem('biometric_password', btoa('biometric_enabled'));
+        }
 
         setIsBiometricEnabled(true);
-        setMessage({ text: 'Biometric login enabled successfully!', type: 'success' });
+        showSuccess('Biometric login enabled successfully!');
       }
     } catch (error: any) {
       console.error('Failed to enable biometric:', error);
       if (error.name === 'NotAllowedError') {
-        setMessage({ text: 'Biometric enrollment was cancelled.', type: 'error' });
+        showError('Biometric enrollment was cancelled.');
       } else {
-        setMessage({ text: 'Failed to enable biometric login. Please try again.', type: 'error' });
+        showError('Failed to enable biometric login. Please try again.');
       }
     } finally {
       setIsProcessing(false);
@@ -114,7 +122,6 @@ const Settings = () => {
     if (!confirmed) return;
 
     setIsProcessing(true);
-    setMessage(null);
 
     try {
       // Remove stored biometric credentials
@@ -123,150 +130,198 @@ const Settings = () => {
       localStorage.removeItem('biometric_password');
 
       setIsBiometricEnabled(false);
-      setMessage({ text: 'Biometric login disabled successfully.', type: 'success' });
+      showSuccess('Biometric login disabled successfully.');
     } catch (error) {
       console.error('Failed to disable biometric:', error);
-      setMessage({ text: 'Failed to disable biometric login.', type: 'error' });
+      showError('Failed to disable biometric login.');
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const toggleBiometric = async () => {
+    if (isBiometricEnabled) {
+      await disableBiometric();
+    } else {
+      await enableBiometric();
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <Header />
-
-      <div className="flex-1 overflow-y-auto pb-20 px-4 pt-4">
-        {/* Page Title */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
-          <p className="text-sm text-gray-600">Manage your account preferences</p>
-        </div>
-
-        {/* Message */}
-        {message && (
-          <div
-            className={`mb-4 px-4 py-3 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      {/* Top App Bar */}
+      <header className="bg-[#1a8ca5] pt-12 pb-4 px-4 shadow-md shrink-0 z-20">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-white hover:bg-white/10 rounded-full p-2 transition-colors -ml-2"
           >
-            {message.text}
-          </div>
-        )}
+            <ArrowLeft01Icon size={24} />
+          </button>
+          <h1 className="text-white text-lg font-bold tracking-tight">Settings</h1>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-white hover:bg-white/10 rounded-full p-2 transition-colors -mr-2"
+          >
+            <Logout05Icon size={24} />
+          </button>
+        </div>
+      </header>
 
-        {/* Biometric Settings Section */}
-        <div className="bg-white rounded-lg shadow-sm mb-4">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Security</h2>
-          </div>
-
-          <div className="px-4 py-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FingerPrintScanIcon className="text-[#115DA9]" size={24} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-800">Biometric Login</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {isBiometricSupported
-                      ? 'Use your fingerprint or Face ID to login quickly and securely'
-                      : 'Your device does not support biometric authentication'}
-                  </p>
-
-                  {isBiometricEnabled && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <CheckmarkCircle02Icon className="text-green-600" size={16} />
-                      <span className="text-sm text-green-600 font-medium">Enabled</span>
-                    </div>
-                  )}
-
-                  {!isBiometricEnabled && isBiometricSupported && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <Cancel01Icon className="text-gray-400" size={16} />
-                      <span className="text-sm text-gray-500 font-medium">Disabled</span>
-                    </div>
-                  )}
-                </div>
+      {/* Main Content (Scrollable) */}
+      <main className="flex-1 overflow-y-auto pb-24">
+        {/* Profile Card */}
+        <div className="bg-white px-6 py-6 mb-2 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="bg-white rounded-full h-16 w-16 flex items-center justify-center overflow-hidden border-2 border-teal-200">
+                <img src="/logos/fif 3.png" alt="User" className="w-full h-full object-cover" />
               </div>
             </div>
+            <div className="flex flex-col justify-center flex-1">
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                {user?.firstName || 'User'}
+              </h2>
+              <p className="text-gray-600 text-sm font-medium">ID: {user?.username || 'N/A'}</p>
+              <span className="text-xs text-[#1a8ca5] font-bold mt-1 bg-teal-50 w-fit px-2 py-0.5 rounded-full">
+                VERIFIED
+              </span>
+            </div>
+            <button className="text-[#1a8ca5] hover:bg-teal-50 p-2 rounded-full transition-colors">
+              <UserCircle02Icon size={24} />
+            </button>
+          </div>
+        </div>
 
-            {isBiometricSupported && (
-              <div className="mt-4">
-                {!isBiometricEnabled ? (
-                  <button
-                    onClick={enableBiometric}
-                    disabled={isProcessing}
-                    className="w-full py-3 bg-[#115DA9] text-white font-semibold rounded-md hover:bg-[#0d4a87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <i className="pi pi-spin pi-spinner"></i>
-                        Setting up...
-                      </>
-                    ) : (
-                      <>
-                        <FingerPrintScanIcon size={20} />
-                        Enable Biometric Login
-                      </>
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    onClick={disableBiometric}
-                    disabled={isProcessing}
-                    className="w-full py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <i className="pi pi-spin pi-spinner"></i>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Cancel01Icon size={20} />
-                        Disable Biometric Login
-                      </>
-                    )}
-                  </button>
-                )}
+        {/* Section: Profile & Security */}
+        <div className="px-4 pt-6 pb-2">
+          <h3 className="text-gray-600 text-xs font-bold tracking-wider uppercase pl-2">
+            Profile & Security
+          </h3>
+        </div>
+        <div className="bg-white mx-4 rounded-xl shadow-sm overflow-hidden border border-gray-200">
+          {/* Change Password */}
+          <button className="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0 group">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10 group-hover:bg-[#1a8ca5] group-hover:text-white transition-colors">
+              <LockPasswordIcon size={20} />
+            </div>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Change Password</p>
+              <p className="text-sm text-gray-600">Update your account password</p>
+            </div>
+            <ArrowLeft01Icon size={20} className="text-gray-400 rotate-180" />
+          </button>
+
+          {/* Biometric Login (Toggle) */}
+          {isBiometricSupported && (
+            <div className="w-full flex items-center gap-4 px-4 py-4 border-b border-gray-200 last:border-0">
+              <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10">
+                <FingerPrintScanIcon size={20} />
               </div>
-            )}
-
-            {!isBiometricSupported && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                <p className="text-xs text-gray-600">
-                  Biometric authentication requires a device with fingerprint scanner, Face ID, or Windows Hello support.
+              <div className="flex flex-col items-start flex-1">
+                <p className="text-base font-medium text-gray-900">Biometric Login</p>
+                <p className="text-sm text-gray-600">
+                  {isBiometricEnabled ? 'Enabled for faster login' : 'Enable for faster login'}
                 </p>
               </div>
-            )}
-          </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={isBiometricEnabled}
+                  onChange={toggleBiometric}
+                  disabled={isProcessing}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1a8ca5]"></div>
+              </label>
+            </div>
+          )}
         </div>
 
-        {/* Account Information */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">Account Information</h2>
+        {/* Section: App Preferences */}
+        <div className="px-4 pt-6 pb-2">
+          <h3 className="text-gray-600 text-xs font-bold tracking-wider uppercase pl-2">
+            App Preferences
+          </h3>
+        </div>
+        <div className="bg-white mx-4 rounded-xl shadow-sm overflow-hidden border border-gray-200">
+          {/* Notifications */}
+          <div className="w-full flex items-center gap-4 px-4 py-4 border-b border-gray-200 last:border-0">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10">
+              <Notification03Icon size={20} />
+            </div>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Push Notifications</p>
+              <p className="text-sm text-gray-600">Transaction alerts & offers</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" defaultChecked />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1a8ca5]"></div>
+            </label>
           </div>
 
-          <div className="px-4 py-4 space-y-3">
-            <div>
-              <p className="text-xs text-gray-500">Username</p>
-              <p className="text-sm font-medium text-gray-800">{user?.username || 'N/A'}</p>
+          {/* Language */}
+          <button className="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0 group">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10 group-hover:bg-[#1a8ca5] group-hover:text-white transition-colors">
+              <Globe02Icon size={20} />
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Name</p>
-              <p className="text-sm font-medium text-gray-800">{user?.firstName || 'N/A'}</p>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Language</p>
+              <p className="text-sm text-gray-600">English (UK)</p>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="text-sm font-medium text-gray-800">{user?.email || 'Not set'}</p>
+            <ArrowLeft01Icon size={20} className="text-gray-400 rotate-180" />
+          </button>
+
+          {/* Theme */}
+          <button className="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors group">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10 group-hover:bg-[#1a8ca5] group-hover:text-white transition-colors">
+              <Moon02Icon size={20} />
             </div>
-          </div>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Theme</p>
+              <p className="text-sm text-gray-600">System Default</p>
+            </div>
+            <ArrowLeft01Icon size={20} className="text-gray-400 rotate-180" />
+          </button>
         </div>
-      </div>
+
+        {/* Section: Support & Legal */}
+        <div className="px-4 pt-6 pb-2">
+          <h3 className="text-gray-600 text-xs font-bold tracking-wider uppercase pl-2">
+            Support & Legal
+          </h3>
+        </div>
+        <div className="bg-white mx-4 rounded-xl shadow-sm overflow-hidden border border-gray-200 mb-6">
+          {/* Help Center */}
+          <button className="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-0 group">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10 group-hover:bg-[#1a8ca5] group-hover:text-white transition-colors">
+              <InformationCircleIcon size={20} />
+            </div>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Help Center</p>
+              <p className="text-sm text-gray-600">FAQs & Contact Support</p>
+            </div>
+            <ArrowLeft01Icon size={20} className="text-gray-400 rotate-180" />
+          </button>
+
+          {/* Terms & Conditions */}
+          <button className="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors group">
+            <div className="flex items-center justify-center rounded-lg bg-teal-50 text-[#1a8ca5] shrink-0 w-10 h-10 group-hover:bg-[#1a8ca5] group-hover:text-white transition-colors">
+              <FileValidationIcon size={20} />
+            </div>
+            <div className="flex flex-col items-start flex-1">
+              <p className="text-base font-medium text-gray-900">Terms & Conditions</p>
+            </div>
+            <ArrowLeft01Icon size={20} className="text-gray-400 rotate-180" />
+          </button>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center pb-8 pt-2">
+          <p className="text-xs text-gray-500 opacity-70">App Version 1.0.0</p>
+          <p className="text-xs text-gray-500 opacity-70 mt-1">© 2025 FIFund. All rights reserved.</p>
+        </div>
+      </main>
 
       <BottomNavigationTabs />
     </div>
