@@ -6,6 +6,28 @@ import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
 import { api_urls } from '../../utilities/api_urls';
 import { getAuthUser, setAuthUser, setUserToken } from '../../utilities/AuthCookieManager';
 
+// TypeScript declarations for Credential Management API
+interface PasswordCredential extends Credential {
+  password: string;
+  name?: string;
+  iconURL?: string;
+}
+
+interface PasswordCredentialData {
+  id: string;
+  password: string;
+  name?: string;
+  iconURL?: string;
+}
+
+declare global {
+  interface Window {
+    PasswordCredential: {
+      new(data: PasswordCredentialData): PasswordCredential;
+    };
+  }
+}
+
 const Login: React.FC = () => {
   const [accessCode, setAccessCode] = useState<string>('');
   const [username, setUsername] = useState<string>('');
@@ -23,10 +45,13 @@ const Login: React.FC = () => {
   }
 
   useEffect(() => {
-    // Check if biometric authentication is supported and credentials are stored
-    const hasStoredCredentials = localStorage.getItem('biometric_enabled') === 'true';
-    const isWebAuthnSupported = window.PublicKeyCredential !== undefined;
-    setIsBiometricSupported(hasStoredCredentials && isWebAuthnSupported);
+    // Check if Credential Management API is supported (used for biometric auth)
+    const checkBiometricSupport = async () => {
+      const isCredentialMgmtSupported = 'credentials' in navigator && 'PasswordCredential' in window;
+      const hasStoredCredentials = localStorage.getItem('biometric_enabled') === 'true';
+      setIsBiometricSupported(isCredentialMgmtSupported && hasStoredCredentials);
+    };
+    checkBiometricSupport();
   },[])
 
   const handleBiometricLogin = async () => {
@@ -35,30 +60,32 @@ const Login: React.FC = () => {
     setIsBiometricSupported(false);
 
     try {
-      // Check if WebAuthn is supported
-      if (!window.PublicKeyCredential) {
+      // Check if Credential Management API is supported
+      if (!('credentials' in navigator)) {
         setErrorMessage('Biometric authentication is not supported on this device.');
         setIsLoading(false);
         setIsBiometricSupported(true);
         return;
       }
 
-      // Get stored credentials
-      const storedUsername = localStorage.getItem('biometric_username');
-      const storedPassword = localStorage.getItem('biometric_password');
+      // Request credentials - this triggers OS-level authentication (fingerprint/Face ID/PIN)
+      const credential = await navigator.credentials.get({
+        password: true,
+        mediation: 'required' // Always show the picker/prompt for security
+      }) as PasswordCredential | null;
 
-      if (!storedUsername || !storedPassword) {
-        setErrorMessage('No biometric credentials found. Please login with username and password first.');
+      if (!credential) {
+        setErrorMessage('Biometric authentication cancelled or failed.');
         setIsLoading(false);
         setIsBiometricSupported(true);
         return;
       }
 
-      // Set credentials and trigger login
-      setUsername(storedUsername);
-      setAccessCode(storedPassword);
+      // Set credentials from the browser's secure storage
+      setUsername(credential.id);
+      setAccessCode(credential.password || '');
 
-      // Create a synthetic event to trigger handleLogin
+      // Trigger login
       const syntheticEvent = { preventDefault: () => {} } as FormEvent;
       await handleLogin(syntheticEvent);
     } catch (error: any) {
@@ -192,10 +219,24 @@ const Login: React.FC = () => {
 
       setAuthUser(userData);
 
-      // Save credentials for biometric login (only on successful login)
-      localStorage.setItem('biometric_enabled', 'true');
-      localStorage.setItem('biometric_username', username);
-      localStorage.setItem('biometric_password', accessCode);
+      // Save credentials for biometric login using browser's secure Credential Management API
+      // This will prompt the user to save and require OS authentication (fingerprint/Face ID) to retrieve
+      if ('credentials' in navigator && 'PasswordCredential' in window) {
+        try {
+          const credential = new PasswordCredential({
+            id: username,
+            password: accessCode,
+            name: userData.firstName || username,
+            iconURL: '/logos/fif 3.png'
+          });
+
+          await navigator.credentials.store(credential);
+          localStorage.setItem('biometric_enabled', 'true');
+        } catch (error) {
+          console.error('Failed to store credentials:', error);
+          // Don't fail the login if credential storage fails
+        }
+      }
 
       // If multiple accounts, navigate to account selection
       // Otherwise go directly to home
@@ -293,7 +334,8 @@ const Login: React.FC = () => {
             <button
               onClick={handleBiometricLogin}
               className="flex items-center justify-center p-3 border border-[#115DA9] rounded-md hover:bg-[#115DA9] hover:text-white transition-colors group"
-              title="Login with biometrics"
+              title="Login with fingerprint or Face ID"
+              aria-label="Login with biometric authentication"
             >
               <FingerPrintScanIcon className="text-[#115DA9] group-hover:text-white" size={28} />
             </button>
