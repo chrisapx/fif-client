@@ -11,13 +11,22 @@ createRoot(document.getElementById('root')!).render(
 )
 
 // Register PWA Service Worker
-const updateSW = registerSW({
-  onNeedRefresh() {
-    if (confirm('New content available. Reload to update?')) {
-      updateSW(true)
+if ('serviceWorker' in navigator) {
+  const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      if (confirm('New content available. Reload to update?')) {
+        updateSW(true)
+      }
+    },
+    onOfflineReady() {
+      console.log('FIFund app ready to work offline')
+    },
+    onRegistered(r) {
+      console.log('Service Worker registered:', r)
+    },
+    onRegisterError(error) {
+      console.error('Service Worker registration error:', error)
     }
-  },
-  onOfflineReady() {
-    console.log('App ready to work offline')
-  },
-})
+  })
+}

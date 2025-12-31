@@ -6,9 +6,11 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      injectRegister: 'auto',
       includeAssets: ['logos/fif 3.png', 'logos/fif 2.png', 'logos/Splach Logo.png'],
       manifest: {
+        id: '/',
         name: 'FIFund',
         short_name: 'FIFund',
         description: 'FIFund - Financial Inclusion Fund',
@@ -17,21 +19,35 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/',
+        start_url: '/?source=pwa',
         icons: [
+          {
+            src: '/logos/fif 3.png',
+            sizes: '64x64 32x32 24x24 16x16',
+            type: 'image/png',
+            purpose: 'any'
+          },
           {
             src: '/logos/fif 3.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/logos/fif 3.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/logos/fif 3.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
           }
-        ]
+        ],
+        categories: ['finance', 'business', 'productivity'],
+        screenshots: []
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
