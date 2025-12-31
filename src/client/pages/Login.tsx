@@ -6,27 +6,32 @@ import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
 import { api_urls } from '../../utilities/api_urls';
 import { getAuthUser, setAuthUser, setUserToken } from '../../utilities/AuthCookieManager';
 
-// TypeScript declarations for Credential Management API
-interface PasswordCredential extends Credential {
-  password: string;
-  name?: string;
-  iconURL?: string;
-}
+// Helper to convert string to ArrayBuffer
+const stringToArrayBuffer = (str: string): ArrayBuffer => {
+  const encoder = new TextEncoder();
+  return encoder.encode(str).buffer;
+};
 
-interface PasswordCredentialData {
-  id: string;
-  password: string;
-  name?: string;
-  iconURL?: string;
-}
-
-declare global {
-  interface Window {
-    PasswordCredential: {
-      new(data: PasswordCredentialData): PasswordCredential;
-    };
+// Helper to convert ArrayBuffer to base64
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-}
+  return btoa(binary);
+};
+
+// Helper to convert base64 to ArrayBuffer
+const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
 
 const Login: React.FC = () => {
   const [accessCode, setAccessCode] = useState<string>('');
@@ -45,11 +50,11 @@ const Login: React.FC = () => {
   }
 
   useEffect(() => {
-    // Check if Credential Management API is supported (used for biometric auth)
+    // Check if WebAuthn is supported and credentials are stored
     const checkBiometricSupport = async () => {
-      const isCredentialMgmtSupported = 'credentials' in navigator && 'PasswordCredential' in window;
-      const hasStoredCredentials = localStorage.getItem('biometric_enabled') === 'true';
-      setIsBiometricSupported(isCredentialMgmtSupported && hasStoredCredentials);
+      const isWebAuthnSupported = window.PublicKeyCredential !== undefined;
+      const hasStoredCredentials = localStorage.getItem('biometric_credentialId') !== null;
+      setIsBiometricSupported(isWebAuthnSupported && hasStoredCredentials);
     };
     checkBiometricSupport();
   },[])
@@ -60,37 +65,67 @@ const Login: React.FC = () => {
     setIsBiometricSupported(false);
 
     try {
-      // Check if Credential Management API is supported
-      if (!('credentials' in navigator)) {
+      // Check WebAuthn support
+      if (!window.PublicKeyCredential) {
         setErrorMessage('Biometric authentication is not supported on this device.');
         setIsLoading(false);
         setIsBiometricSupported(true);
         return;
       }
 
-      // Request credentials - this triggers OS-level authentication (fingerprint/Face ID/PIN)
-      const credential = await navigator.credentials.get({
-        password: true,
-        mediation: 'required' // Always show the picker/prompt for security
-      }) as PasswordCredential | null;
+      // Get stored credential info
+      const credentialIdBase64 = localStorage.getItem('biometric_credentialId');
+      const storedUsername = localStorage.getItem('biometric_username');
+      const encryptedPassword = localStorage.getItem('biometric_password');
 
-      if (!credential) {
-        setErrorMessage('Biometric authentication cancelled or failed.');
+      if (!credentialIdBase64 || !storedUsername || !encryptedPassword) {
+        setErrorMessage('No biometric credentials found. Please login with username and password first.');
         setIsLoading(false);
         setIsBiometricSupported(true);
         return;
       }
 
-      // Set credentials from the browser's secure storage
-      setUsername(credential.id);
-      setAccessCode(credential.password || '');
+      // Prepare WebAuthn authentication request
+      const credentialId = base64ToArrayBuffer(credentialIdBase64);
+      const challenge = stringToArrayBuffer(Math.random().toString(36));
+
+      // Request biometric authentication - THIS TRIGGERS THE ACTUAL FINGERPRINT/FACE ID PROMPT
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge,
+          allowCredentials: [{
+            id: credentialId,
+            type: 'public-key',
+            transports: ['internal']
+          }],
+          userVerification: 'required', // This ensures biometric verification
+          timeout: 60000
+        }
+      });
+
+      if (!assertion) {
+        setErrorMessage('Biometric authentication cancelled.');
+        setIsLoading(false);
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      // Biometric authentication successful! Decrypt and use credentials
+      const decodedPassword = atob(encryptedPassword);
+
+      setUsername(storedUsername);
+      setAccessCode(decodedPassword);
 
       // Trigger login
       const syntheticEvent = { preventDefault: () => {} } as FormEvent;
       await handleLogin(syntheticEvent);
     } catch (error: any) {
       console.error('Biometric login failed:', error);
-      setErrorMessage('Biometric authentication failed. Please try manual login.');
+      if (error.name === 'NotAllowedError') {
+        setErrorMessage('Biometric authentication was cancelled or failed.');
+      } else {
+        setErrorMessage('Biometric authentication failed. Please try manual login.');
+      }
       setIsLoading(false);
       setIsBiometricSupported(true);
     }
@@ -219,22 +254,53 @@ const Login: React.FC = () => {
 
       setAuthUser(userData);
 
-      // Save credentials for biometric login using browser's secure Credential Management API
-      // This will prompt the user to save and require OS authentication (fingerprint/Face ID) to retrieve
-      if ('credentials' in navigator && 'PasswordCredential' in window) {
+      // Register WebAuthn credential for biometric login
+      // This will trigger fingerprint/Face ID enrollment
+      if (window.PublicKeyCredential) {
         try {
-          const credential = new PasswordCredential({
-            id: username,
-            password: accessCode,
-            name: userData.firstName || username,
-            iconURL: '/logos/fif 3.png'
-          });
+          const userId = stringToArrayBuffer(username);
+          const challenge = stringToArrayBuffer(Math.random().toString(36));
 
-          await navigator.credentials.store(credential);
-          localStorage.setItem('biometric_enabled', 'true');
-        } catch (error) {
-          console.error('Failed to store credentials:', error);
-          // Don't fail the login if credential storage fails
+          // Create WebAuthn credential - THIS PROMPTS FOR BIOMETRIC ENROLLMENT
+          const credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: challenge,
+              rp: {
+                name: 'FIFund',
+                id: window.location.hostname
+              },
+              user: {
+                id: userId,
+                name: username,
+                displayName: userData.firstName || username
+              },
+              pubKeyCredParams: [
+                { alg: -7, type: 'public-key' },  // ES256
+                { alg: -257, type: 'public-key' } // RS256
+              ],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform', // Use platform authenticator (Touch ID, Face ID, Windows Hello)
+                userVerification: 'required',
+                requireResidentKey: false
+              },
+              timeout: 60000,
+              attestation: 'none'
+            }
+          }) as PublicKeyCredential;
+
+          if (credential) {
+            // Store credential ID and encrypted password
+            const credentialId = arrayBufferToBase64(credential.rawId);
+            const encryptedPassword = btoa(accessCode);
+
+            localStorage.setItem('biometric_credentialId', credentialId);
+            localStorage.setItem('biometric_username', username);
+            localStorage.setItem('biometric_password', encryptedPassword);
+          }
+        } catch (error: any) {
+          console.error('Failed to register biometric credential:', error);
+          // Don't fail the login if biometric registration fails
+          // User can still use regular login
         }
       }
 
