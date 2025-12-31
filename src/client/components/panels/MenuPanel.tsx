@@ -132,45 +132,9 @@ const MenuPanel: React.FC = () => {
                         <div className="absolute -left-3 top-0 bottom-0 w-[1px] bg-white/30"></div>
                         <a
                           className="block hover:text-white pl-2 cursor-pointer"
-                          onClick={() => handleNavigate('/transfers/savings-transactions')}
-                        >
-                          Savings Transactions
-                        </a>
-                      </li>
-                      <li className="relative">
-                        <div className="absolute -left-3 top-0 bottom-0 w-[1px] bg-white/30"></div>
-                        <a
-                          className="block hover:text-white pl-2 cursor-pointer"
-                          onClick={() => handleNavigate('/transfers/loan-transactions')}
-                        >
-                          Loan Transactions
-                        </a>
-                      </li>
-                      <li className="relative">
-                        <div className="absolute -left-3 top-0 bottom-0 w-[1px] bg-white/30"></div>
-                        <a
-                          className="block hover:text-white pl-2 cursor-pointer"
                           onClick={() => handleNavigate('/transfers/own-accounts')}
                         >
                           Between Own Accounts
-                        </a>
-                      </li>
-                      <li className="relative">
-                        <div className="absolute -left-3 top-0 bottom-0 w-[1px] bg-white/30"></div>
-                        <a
-                          className="block hover:text-white pl-2 cursor-pointer"
-                          onClick={() => handleNavigate('/transfers/beneficiary')}
-                        >
-                          To Another Account
-                        </a>
-                      </li>
-                      <li className="relative">
-                        <div className="absolute -left-3 top-0 bottom-0 w-[1px] bg-white/30"></div>
-                        <a
-                          className="block hover:text-white pl-2 cursor-pointer"
-                          onClick={() => handleNavigate('/transfers/wire-transfer')}
-                        >
-                          Wire to Another FSP
                         </a>
                       </li>
                     </ul>

@@ -16,33 +16,38 @@ const Transfers: React.FC = () => {
   const transferOptions = [
     {
       title: 'Savings Transactions',
-      description: 'View and manage your savings transactions',
-      icon: <MoneyExchange01Icon size={24} className="text-[#1a8ca5]" />,
-      path: '/transfers/savings-transactions'
+      description: 'View and manage your savings transactions (Coming Soon)',
+      icon: <MoneyExchange01Icon size={24} className="text-gray-400" />,
+      path: '/transfers/savings-transactions',
+      disabled: true
     },
     {
       title: 'Loan Transactions',
-      description: 'View and manage your loan transactions',
-      icon: <Building03Icon size={24} className="text-[#1a8ca5]" />,
-      path: '/transfers/loan-transactions'
+      description: 'View and manage your loan transactions (Coming Soon)',
+      icon: <Building03Icon size={24} className="text-gray-400" />,
+      path: '/transfers/loan-transactions',
+      disabled: true
     },
     {
       title: 'Between Own Accounts',
       description: 'Transfer money between your own accounts',
       icon: <ArrowDataTransferVerticalIcon size={24} className="text-[#1a8ca5]" />,
-      path: '/transfers/own-accounts'
+      path: '/transfers/own-accounts',
+      disabled: false
     },
     {
       title: 'To Another Account',
-      description: 'Transfer to saved beneficiaries',
-      icon: <BankIcon size={24} className="text-[#1a8ca5]" />,
-      path: '/transfers/beneficiary'
+      description: 'Transfer to saved beneficiaries (Coming Soon)',
+      icon: <BankIcon size={24} className="text-gray-400" />,
+      path: '/transfers/beneficiary',
+      disabled: true
     },
     {
       title: 'Wire to Another FSP',
-      description: 'Wire transfer to other financial institutions',
-      icon: <Building03Icon size={24} className="text-[#1a8ca5]" />,
-      path: '/transfers/wire-transfer'
+      description: 'Wire transfer to other financial institutions (Coming Soon)',
+      icon: <Building03Icon size={24} className="text-gray-400" />,
+      path: '/transfers/wire-transfer',
+      disabled: true
     }
   ];
 
@@ -60,26 +65,28 @@ const Transfers: React.FC = () => {
         {/* Transfer Options */}
         <div className="px-4 py-2">
           <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-            {transferOptions.map((option, index) => (
-              <div
-                key={index}
-                onClick={() => navigate(option.path)}
-                className="flex items-center gap-4 px-4 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors"
-              >
-                <div className="shrink-0 w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
-                  {option.icon}
+            {transferOptions
+              .filter(option => !option.disabled)
+              .map((option, index) => (
+                <div
+                  key={index}
+                  onClick={() => navigate(option.path)}
+                  className="flex items-center gap-4 px-4 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors"
+                >
+                  <div className="shrink-0 w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
+                    {option.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-gray-900 text-base font-semibold">
+                      {option.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm mt-0.5">
+                      {option.description}
+                    </p>
+                  </div>
+                  <ArrowRight01Icon size={24} className="text-gray-400" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-gray-900 text-base font-semibold">
-                    {option.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mt-0.5">
-                    {option.description}
-                  </p>
-                </div>
-                <ArrowRight01Icon size={24} className="text-gray-300" />
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
