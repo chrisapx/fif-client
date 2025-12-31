@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { GiBanknote } from 'react-icons/gi'
 import { BiHistory } from 'react-icons/bi'
-import { MoneyExchange01Icon } from 'hugeicons-react'
+import { MoneyExchange01Icon, Settings02Icon } from 'hugeicons-react'
 
 const BottomNavigationTabs: React.FC = () => {
   return (
@@ -30,6 +30,15 @@ const BottomNavigationTabs: React.FC = () => {
           <div className="flex flex-col items-center cursor-pointer transition-colors">
             <BiHistory className={isActive ? "text-[#115DA9]" : "text-gray-500"} size={24} />
             <span className={`text-xs mt-1 ${isActive ? "text-[#115DA9]" : "text-gray-500"}`}>History</span>
+          </div>
+        )}
+      </NavLink>
+
+      <NavLink to="/settings">
+        {({ isActive }) => (
+          <div className="flex flex-col items-center cursor-pointer transition-colors">
+            <Settings02Icon className={isActive ? "text-[#115DA9]" : "text-gray-500"} size={24} />
+            <span className={`text-xs mt-1 ${isActive ? "text-[#115DA9]" : "text-gray-500"}`}>Settings</span>
           </div>
         )}
       </NavLink>

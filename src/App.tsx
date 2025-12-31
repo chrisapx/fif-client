@@ -16,6 +16,7 @@ import NewTransactionForm from "./client/components/forms/NewTransactionForm"
 import MobileOnlyWrapper from "./components/MobileOnlyWrapper"
 import Welcome from "./client/pages/Welcome"
 import SavingsProducts from "./client/pages/SavingsProducts"
+import Settings from "./client/pages/Settings"
 // import { useSessionManager } from "./hooks/useSessionManager"
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
         <Route path="/apply-products" element={<ApplyForProducts/>}/>
         <Route path="/savings-products" element={<SavingsProducts/>}/>
         <Route path="fund-account" element={<FundMyAccount/>} />
+        <Route path="/settings" element={<Settings/>} />
       </Routes>
       <NewTransactionForm/>
       <LoanRequestForm/>

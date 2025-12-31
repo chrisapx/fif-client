@@ -40,6 +40,8 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showPin, setShowPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+  const [pendingUserData, setPendingUserData] = useState<any>(null);
   
   const toggleVisibility = () => setShowPin((prev) => !prev);
   
@@ -58,6 +60,83 @@ const Login: React.FC = () => {
     };
     checkBiometricSupport();
   },[])
+
+  const enableBiometricAuth = async () => {
+    setIsLoading(true);
+    setShowBiometricPrompt(false);
+
+    try {
+      const userId = stringToArrayBuffer(username);
+      const challenge = stringToArrayBuffer(Math.random().toString(36));
+
+      // Create WebAuthn credential - THIS PROMPTS FOR BIOMETRIC ENROLLMENT
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: challenge,
+          rp: {
+            name: 'FIFund',
+            id: window.location.hostname
+          },
+          user: {
+            id: userId,
+            name: username,
+            displayName: pendingUserData?.firstName || username
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: 'public-key' },  // ES256
+            { alg: -257, type: 'public-key' } // RS256
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            requireResidentKey: false
+          },
+          timeout: 60000,
+          attestation: 'none'
+        }
+      }) as PublicKeyCredential;
+
+      if (credential) {
+        // Store credential ID and encrypted password
+        const credentialId = arrayBufferToBase64(credential.rawId);
+        const encryptedPassword = btoa(accessCode);
+
+        localStorage.setItem('biometric_credentialId', credentialId);
+        localStorage.setItem('biometric_username', username);
+        localStorage.setItem('biometric_password', encryptedPassword);
+      }
+
+      // Navigate to home
+      if (pendingUserData.accounts && pendingUserData.accounts.length > 1) {
+        navigate('/select-account');
+      } else {
+        navigate('/home');
+      }
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Failed to enable biometric:', error);
+      // Continue to home even if biometric fails
+      if (pendingUserData.accounts && pendingUserData.accounts.length > 1) {
+        navigate('/select-account');
+      } else {
+        navigate('/home');
+      }
+      window.location.reload();
+    }
+  };
+
+  const declineBiometricAuth = () => {
+    setShowBiometricPrompt(false);
+    setIsLoading(false);
+
+    // Navigate to home without biometric
+    if (pendingUserData.accounts && pendingUserData.accounts.length > 1) {
+      navigate('/select-account');
+    } else {
+      navigate('/home');
+    }
+    window.location.reload();
+  };
 
   const handleBiometricLogin = async () => {
     setErrorMessage('');
@@ -110,15 +189,88 @@ const Login: React.FC = () => {
         return;
       }
 
-      // Biometric authentication successful! Decrypt and use credentials
+      // Biometric authentication successful! Login directly without filling form
+      const decodedUsername = storedUsername;
       const decodedPassword = atob(encryptedPassword);
 
-      setUsername(storedUsername);
-      setAccessCode(decodedPassword);
+      // Authenticate directly with API
+      const credentials = btoa(`${decodedUsername}:${decodedPassword}`);
+      const tenant = import.meta.env.VITE_FINERACT_TENANT || 'default';
 
-      // Trigger login
-      const syntheticEvent = { preventDefault: () => {} } as FormEvent;
-      await handleLogin(syntheticEvent);
+      const response = await fetch(api_urls.authentication.login, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Fineract-Platform-TenantId': tenant,
+          'Authorization': `Basic ${credentials}`
+        },
+        body: JSON.stringify({ username: decodedUsername, password: decodedPassword }),
+      });
+
+      if (!response.ok) {
+        setErrorMessage('Login failed. Please try manual login.');
+        setIsLoading(false);
+        setIsBiometricSupported(true);
+        return;
+      }
+
+      const data = await response.json();
+      setUserToken(credentials);
+
+      // Process user data (same logic as handleLogin)
+      if (data.authenticated && data.clients?.length > 0) {
+        const clientDetailsPromises = data.clients.map(async (clientId: number) => {
+          try {
+            const response = await fetch(`${api_urls.authentication.self.replace('/self/user', '')}/self/clients/${clientId}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Fineract-Platform-TenantId': tenant,
+                'Authorization': `Basic ${credentials}`
+              }
+            });
+            return response.ok ? await response.json() : null;
+          } catch (error) {
+            return null;
+          }
+        });
+
+        const clientsData = await Promise.all(clientDetailsPromises);
+        const validClients = clientsData.filter(client => client !== null);
+
+        const accounts = validClients.map((client: any) => ({
+          clientId: client.id?.toString(),
+          displayName: client.displayName || client.firstname || decodedUsername,
+          email: client.emailAddress || '',
+          accountNo: client.accountNo || '',
+          officeId: client.officeId,
+          officeName: client.officeName,
+          status: client.status?.value || 'Active'
+        }));
+
+        const userData = {
+          username: decodedUsername,
+          officeId: data.officeId,
+          officeName: data.officeName,
+          roles: data.roles || ['CLIENT'],
+          permissions: data.permissions || [],
+          accounts: accounts,
+          selectedAccountIndex: accounts.length === 1 ? 0 : null,
+          userId: accounts.length === 1 ? accounts[0].clientId : undefined,
+          email: accounts.length === 1 ? accounts[0].email : '',
+          firstName: accounts.length === 1 ? accounts[0].displayName : decodedUsername
+        };
+
+        setAuthUser(userData);
+
+        // Navigate
+        if (userData.accounts && userData.accounts.length > 1) {
+          navigate('/select-account');
+        } else {
+          navigate('/home');
+        }
+        window.location.reload();
+      }
     } catch (error: any) {
       console.error('Biometric login failed:', error);
       if (error.name === 'NotAllowedError') {
@@ -254,64 +406,23 @@ const Login: React.FC = () => {
 
       setAuthUser(userData);
 
-      // Register WebAuthn credential for biometric login
-      // This will trigger fingerprint/Face ID enrollment
-      if (window.PublicKeyCredential) {
-        try {
-          const userId = stringToArrayBuffer(username);
-          const challenge = stringToArrayBuffer(Math.random().toString(36));
+      // Check if biometric is already enabled
+      const biometricAlreadyEnabled = localStorage.getItem('biometric_credentialId') !== null;
 
-          // Create WebAuthn credential - THIS PROMPTS FOR BIOMETRIC ENROLLMENT
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: challenge,
-              rp: {
-                name: 'FIFund',
-                id: window.location.hostname
-              },
-              user: {
-                id: userId,
-                name: username,
-                displayName: userData.firstName || username
-              },
-              pubKeyCredParams: [
-                { alg: -7, type: 'public-key' },  // ES256
-                { alg: -257, type: 'public-key' } // RS256
-              ],
-              authenticatorSelection: {
-                authenticatorAttachment: 'platform', // Use platform authenticator (Touch ID, Face ID, Windows Hello)
-                userVerification: 'required',
-                requireResidentKey: false
-              },
-              timeout: 60000,
-              attestation: 'none'
-            }
-          }) as PublicKeyCredential;
-
-          if (credential) {
-            // Store credential ID and encrypted password
-            const credentialId = arrayBufferToBase64(credential.rawId);
-            const encryptedPassword = btoa(accessCode);
-
-            localStorage.setItem('biometric_credentialId', credentialId);
-            localStorage.setItem('biometric_username', username);
-            localStorage.setItem('biometric_password', encryptedPassword);
-          }
-        } catch (error: any) {
-          console.error('Failed to register biometric credential:', error);
-          // Don't fail the login if biometric registration fails
-          // User can still use regular login
-        }
+      // If biometric not enabled and device supports it, ask user if they want to enable it
+      if (!biometricAlreadyEnabled && window.PublicKeyCredential) {
+        setPendingUserData(userData);
+        setShowBiometricPrompt(true);
+        setIsLoading(false);
+        return; // Don't navigate yet, wait for user response
       }
 
-      // If multiple accounts, navigate to account selection
-      // Otherwise go directly to home
+      // Navigate to home
       if (userData.accounts && userData.accounts.length > 1) {
         navigate('/select-account');
       } else {
         navigate('/home');
       }
-      // Don't set loading to false here since page will reload
       window.location.reload();
     } catch (error: any) {
       console.error('Login failed:', error);
@@ -424,6 +535,59 @@ const Login: React.FC = () => {
       <div className="flex justify-center items-center border-t pt-4 border-gray-300">
         <p className="text-sm text-gray-400">Family Investment Fund © FIF Inc</p>
       </div>
+
+      {/* Biometric Enrollment Prompt Modal */}
+      {showBiometricPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <FingerPrintScanIcon className="text-[#115DA9]" size={32} />
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Enable Biometric Login?
+              </h2>
+
+              <p className="text-sm text-gray-600 mb-6">
+                Would you like to use your fingerprint or Face ID to login next time? This makes logging in faster and more secure.
+              </p>
+
+              <div className="flex flex-col w-full gap-3">
+                <button
+                  onClick={enableBiometricAuth}
+                  disabled={isLoading}
+                  className="w-full py-3 bg-[#115DA9] text-white font-semibold rounded-md hover:bg-[#0d4a87] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <i className="pi pi-spin pi-spinner"></i>
+                      Setting up...
+                    </>
+                  ) : (
+                    <>
+                      <FingerPrintScanIcon size={20} />
+                      Yes, Enable Biometric Login
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={declineBiometricAuth}
+                  disabled={isLoading}
+                  className="w-full py-3 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50"
+                >
+                  Not Now
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 mt-4">
+                You can always enable this later in settings
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
