@@ -92,15 +92,28 @@ const Settings = () => {
 
       if (credential) {
         const credentialId = arrayBufferToBase64(credential.rawId);
-        // Get stored password from current session
-        const storedPassword = localStorage.getItem('biometric_password') || '';
+
+        // Extract password from current auth token (Basic Auth: base64(username:password))
+        const authToken = localStorage.getItem('mc_user_tkn');
+        if (!authToken) {
+          showError('Session expired. Please login again.');
+          setIsProcessing(false);
+          return;
+        }
+
+        // Decode the Basic Auth token to get username:password
+        const decodedAuth = atob(authToken);
+        const [, password] = decodedAuth.split(':');
+
+        if (!password) {
+          showError('Failed to retrieve credentials. Please login again.');
+          setIsProcessing(false);
+          return;
+        }
 
         localStorage.setItem('biometric_credentialId', credentialId);
         localStorage.setItem('biometric_username', username);
-        if (!storedPassword) {
-          // If no password stored, store a placeholder
-          localStorage.setItem('biometric_password', btoa('biometric_enabled'));
-        }
+        localStorage.setItem('biometric_password', btoa(password));
 
         setIsBiometricEnabled(true);
         showSuccess('Biometric login enabled successfully!');

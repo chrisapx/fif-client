@@ -19,11 +19,11 @@ import SavingsProducts from "./client/pages/SavingsProducts"
 import Settings from "./client/pages/Settings"
 import OwnAccountTransfer from "./client/pages/transfers/OwnAccountTransfer"
 import { ToastProvider } from "./contexts/ToastContext"
-// import { useSessionManager } from "./hooks/useSessionManager"
+import { useSessionManager } from "./hooks/useSessionManager"
 
 function App() {
   // Initialize session manager (5min session, 30sec inactivity timeout)
-  // useSessionManager();
+  useSessionManager();
 
   return (
     <ToastProvider>

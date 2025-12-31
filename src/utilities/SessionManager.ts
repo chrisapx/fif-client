@@ -4,8 +4,10 @@
  * Manages client-side session with automatic renewal and inactivity timeout.
  * - Session duration: 5 minutes (renews on user activity)
  * - Inactivity timeout: 30 seconds (destroys session if no activity)
- * - On session destruction: Clears all localStorage data and auth tokens
+ * - On session destruction: Follows logout flow (preserves biometric credentials)
  */
+
+import { logout } from "./AuthCookieManager";
 
 type SessionEventCallback = () => void;
 
@@ -150,17 +152,21 @@ class SessionManager {
   }
 
   /**
-   * Clear all localStorage data including auth tokens
+   * Clear auth data while preserving biometric credentials
+   * Uses the same logout flow as manual logout
    */
   private clearAllStorageData(): void {
-    // Clear specific auth keys
-    const authKeys = ['mc_user_tkn', 'mc_user', 'authUser'];
-    authKeys.forEach(key => localStorage.removeItem(key));
+    // Use logout function which only removes:
+    // - mc_user_tkn
+    // - mc_user
+    // - authUser
+    // This preserves biometric credentials:
+    // - biometric_credentialId
+    // - biometric_username
+    // - biometric_password
+    logout();
 
-    // Optionally clear all localStorage (uncomment if needed)
-    // localStorage.clear();
-
-    console.log('SessionManager: Cleared all auth data from localStorage');
+    console.log('SessionManager: Cleared auth data (preserved biometric credentials)');
   }
 
   /**

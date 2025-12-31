@@ -58,6 +58,7 @@ const MenuPanel: React.FC = () => {
 
   const handleLogout = () => {
     logout();
+    // Don't destroy session manager - let it persist for biometric login
     navigate('/login');
   }
 
