@@ -406,6 +406,9 @@ const Login: React.FC = () => {
 
       setAuthUser(userData);
 
+      // Save current time as last login time
+      localStorage.setItem('lastLoginTime', new Date().toISOString());
+
       // Check if biometric is already enabled
       const biometricAlreadyEnabled = localStorage.getItem('biometric_credentialId') !== null;
 
