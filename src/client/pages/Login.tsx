@@ -47,9 +47,9 @@ const Login: React.FC = () => {
   
   const navigate = useNavigate();
 
-  const handleCreateAccount = () => {
-    navigate('/create-account')
-  }
+  // const handleCreateAccount = () => {
+  //   navigate('/create-account')
+  // }
 
   useEffect(() => {
     // Check if WebAuthn is supported and credentials are stored
