@@ -2,7 +2,7 @@ import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button'
-import { BankIcon, FingerPrintScanIcon } from 'hugeicons-react';
+import { FingerPrintScanIcon } from 'hugeicons-react';
 import { api_urls } from '../../utilities/api_urls';
 import { getAuthUser, setAuthUser, setUserToken } from '../../utilities/AuthCookieManager';
 
@@ -522,7 +522,7 @@ const Login: React.FC = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-1 w-full">
+        {/* <div className="grid grid-cols-2 gap-1 w-full">
           <button
             onClick={handleCreateAccount}
             className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#1a8ca5] text-xs flex justify-between items-center"
@@ -532,7 +532,7 @@ const Login: React.FC = () => {
           <button className="px-2 py-6 font-thin bg-gray-200 border-b-2 rounded border-[#1a8ca5] text-xs flex justify-center items-center opacity-50">
             ?
           </button>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex justify-center items-center border-t pt-4 border-gray-300">
